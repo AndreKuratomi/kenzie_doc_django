@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 
 class UserSerializer(serializers.Serializer):
-    uuid = serializers.UUIDField()
+    uuid = serializers.UUIDField(read_only=True)
     is_prof = serializers.BooleanField()
     is_admin = serializers.BooleanField()
     email = serializers.EmailField()
@@ -11,7 +11,7 @@ class UserSerializer(serializers.Serializer):
 
 
 class AddressSerializer(serializers.Serializer):
-    uuid = serializers.UUIDField()
+    uuid = serializers.UUIDField(read_only=True)
     street = serializers.CharField()
     house_number = serializers.IntegerField()
     state = serializers.CharField()
