@@ -11,7 +11,11 @@ class AddressSerializer(serializers.Serializer):
 
 class ProfessionalSerializer(serializers.Serializer):
     uuid = serializers.UUIDField(read_only=True)
-    username = serializers.CharField()
+    # username = serializers.CharField()
+    # keila editing
+    name = serializers.CharField()
+    email = serializers.CharField()
+     # keila editing
     council_number = serializers.CharField()
     specialty = serializers.CharField()
     address = AddressSerializer(many=True, read_only=True)
