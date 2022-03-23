@@ -1,24 +1,5 @@
 from rest_framework import serializers
-# from appointments.serializers import AppointmentsSerializer
 # import uuid
-
-
-class AddressSerializer(serializers.Serializer):
-    uuid = serializers.UUIDField()
-    street = serializers.CharField()
-    house_number = serializers.IntegerField()
-    state = serializers.CharField()
-
-
-class ProfessionalSerializer(serializers.Serializer):
-    council_number = serializers.CharField()
-    specialty = serializers.CharField()
-
-
-class PatientSerializer(serializers.Serializer):
-    cpf = serializers.CharField()
-    age = serializers.CharField()
-    sex = serializers.CharField()
 
 
 class UserSerializer(serializers.Serializer):
@@ -28,13 +9,38 @@ class UserSerializer(serializers.Serializer):
     email = serializers.EmailField()
     username = serializers.CharField()
 
-    address = AddressSerializer(many=True)
-    patient = PatientSerializer(many=True)
-    professional = ProfessionalSerializer(many=True)
 
-    # address = serializers.ForeignKey()
-    # patient = serializers.ForeignKey()
-    # professional = serializers.ForeignKey()
+class AddressSerializer(serializers.Serializer):
+    uuid = serializers.UUIDField()
+    street = serializers.CharField()
+    house_number = serializers.IntegerField()
+    state = serializers.CharField()
+
+    users = UserSerializer(many=True)
+
+
+class ProfessionalSerializer(serializers.Serializer):
+    council_number = serializers.CharField()
+    specialty = serializers.CharField()
+
+    users = UserSerializer(many=True)
+
+
+class PatientSerializer(serializers.Serializer):
+    cpf = serializers.CharField()
+    age = serializers.CharField()
+    sex = serializers.CharField()
+
+    users = UserSerializer(many=True)
+
+
+class PatientToUpdateSerializer(serializers.Serializer):
+    cpf = serializers.CharField(required=False)
+    age = serializers.CharField(required=False)
+    sex = serializers.CharField(required=False)
+
+    users = UserSerializer(many=True)
+
 
 
 # class PatientSerializer(serializers.Serializer):
