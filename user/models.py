@@ -52,9 +52,6 @@ class Professional(models.Model):
     council_number = models.CharField(primary_key=True, max_length=8, editable=False)
     specialty = models.CharField(max_length=255)
 
-    # keila editing
-    # keila editing
-
 class Patient(models.Model):
     cpf = models.CharField(primary_key=True, max_length=11, editable=False)
     age = models.CharField(max_length=255)
