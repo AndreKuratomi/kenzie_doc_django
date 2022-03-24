@@ -44,3 +44,7 @@ class PatientToUpdateSerializer(serializers.Serializer):
     sex = serializers.CharField(required=False)
 
     users = UserSerializer(many=True)
+
+class AdminSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    password = serializers.CharField(write_only=True)
