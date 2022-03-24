@@ -1,5 +1,7 @@
 from email.headerregistry import Address
 from rest_framework import serializers
+
+from user.models import Patient
 # import uuid
 
 
@@ -30,12 +32,13 @@ class ProfessionalSerializer(serializers.Serializer):
     users = UserSerializer(many=True)
 
 
-class PatientSerializer(serializers.Serializer):
-    cpf = serializers.CharField()
-    age = serializers.CharField()
-    sex = serializers.CharField()
+class PatientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Patient
+        fields = "__all__"
+        depth = 1
 
-    users = UserSerializer(many=True)
+    # users = UserSerializer(many=True)
 
 
 class PatientToUpdateSerializer(serializers.Serializer):
