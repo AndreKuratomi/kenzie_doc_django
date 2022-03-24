@@ -5,8 +5,8 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Patient
-from .serializers import PatientSerializer, PatientToUpdateSerializer
+from .models import Patient, Professional
+from .serializers import PatientSerializer, PatientToUpdateSerializer, ProfessionalSerializer
 from .permissions import IsAdmin
 
 from .services import is_valid_uuid
@@ -108,3 +108,96 @@ class PatientByIdView(APIView):
             return Response({"message": "No patient found"}, status=status.HTTP_404_NOT_FOUND)
         except ValueError:
             return Response({"message": "No valid UUID"}, status=status.HTTP_404_NOT_FOUND)
+
+
+class ProfessionalsView(APIView):
+
+    # authentication_classes = [TokenAuthentication]
+    # permission_classes = [IsAdmin]
+
+    def post(self, request):
+
+        serializer = ProfessionalSerializer(data=request.data)
+
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        if Professional.objects.filter(council_number=serializer.validated_data['council_number']).exists() == True:
+            return Response({"message": "This professional already exists"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+        # professional = Professional.objects.create_user(**serializer.validated_data)
+        professional = Professional.objects.create(**serializer.validated_data)
+
+        # users.set([]) ?
+
+        serializer = ProfessionalSerializer(professional)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def get(self, request):
+
+        professionals = Professional.objects.all()
+
+        serialized = ProfessionalSerializer(professionals, many=True)
+
+        return Response(serialized.data, status=status.HTTP_200_OK)
+
+class ProfessionalsByIdView(APIView):
+
+    # authentication_classes = [TokenAuthentication]
+    # permission_classes = [IsAdmin]
+
+    def get(self, request, council_number=''):
+
+        try:
+            professional = Professional.objects.get(council_number=council_number)
+
+        except Professional.DoesNotExist:
+            return Response(
+                {'message': 'Professional does not exist'}, status=status.HTTP_404_NOT_FOUND,
+            )
+
+        serializer = ProfessionalSerializer(professional)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+        
+
+    def patch(self, request, council_number=''):
+
+        try:
+            professional = Professional.objects.get(council_number=council_number)
+
+            serialized = ProfessionalSerializer(data=request.data, partial=True)
+            serialized.is_valid()
+            
+            data = {**serialized.validated_data}
+
+            if 'council_number' in data:
+                if Professional.objects.filter(council_number=request.data['council_number']).exists() == True:
+                    response = {"message": "This council_number already exists"}
+                    return Response(response, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+            for key, value in data.items():
+                professional.__dict__[key] = value
+            
+            professional.save()
+
+            professional = Professional.objects.get(uuid=council_number)
+            serialized = ProfessionalSerializer(professional)
+
+            return Response(serialized.data)        
+
+        except Professional.DoesNotExist:
+            return Response(
+                {'message': 'Professional does not exist'}, status=status.HTTP_404_NOT_FOUND,
+            )
+    
+
+    def delete(self, request, council_number=''):
+
+        try:
+            professional = Professional.objects.get(council_number=council_number).delete()
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Professional.DoesNotExist:
+            return Response({"message": "Professional does not exist"}, status=status.HTTP_404_NOT_FOUND)
