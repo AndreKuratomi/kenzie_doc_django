@@ -1,7 +1,7 @@
 from django.db import IntegrityError
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.generics import CreateAPIView, ListAPIView
+from rest_framework.generics import ListCreateAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -12,43 +12,10 @@ from .permissions import IsAdmin
 from .services import is_valid_uuid
 
 
-class PatientsView(CreateAPIView):
+class PatientsView(ListCreateAPIView):
 
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
-
-    # authentication_classes = [TokenAuthentication]
-    # permission_classes = [IsAdmin]
-
-    # def post(self, request):
-    #     try:
-    #         serializer = PatientSerializer(data=request.data)
-    #         print(serializer)
-    #         data=request.data
-
-    #         if not serializer.is_valid():
-    #             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    #         does_patient_already_exists = Patient.objects.filter(cpf=serializer.validated_data['cpf']).exists()
-    #         if does_patient_already_exists is True:
-    #             return Response({"message": "This patient already exists"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-            
-    #         user = User.objects.create_user(data['email'], data['password'])
-
-    #         new_patient = Patient.objects.create(user=user, **serializer.validated_data)
-
-    #         serialized_new_patient = PatientSerializer(new_patient)
-
-    #         return Response(serialized_new_patient.data, status=status.HTTP_201_CREATED)
-
-    #     except:
-    #         return Response(status=status.HTTP_400_BAD_REQUEST)
-
-
-class PatientsListView(ListAPIView):
-
-    queryset = Patient.objects.all()
-    serialized_class = PatientSerializer
 
     # authentication_classes = [TokenAuthentication]
     # permission_classes = [IsAdmin]

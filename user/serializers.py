@@ -73,11 +73,13 @@ class PatientSerializer(serializers.ModelSerializer):
 
         return new_patient
 
-
     # def list(self, validated_data):
-    #     user = User.objects.create_user(email=validated_data['user']['email'], password=validated_data['user']['password'])
-    #     new_patient = Patient.objects.create(user=user, cpf=validated_data['cpf'], age=validated_data['age'], sex=validated_data['sex'])
 
+    #     patients = Patient.objects.all()
+
+    #     serialized = PatientSerializer(patients, many=True)
+
+    #     return Response(serialized.data, status=status.HTTP_200_OK)
     #     return new_patient
 
 
