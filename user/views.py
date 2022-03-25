@@ -1,4 +1,3 @@
-from cgitb import lookup
 from django.db import IntegrityError
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
@@ -9,8 +8,6 @@ from rest_framework.views import APIView
 from .models import Patient, Professional, User
 from .serializers import PatientSerializer, PatientToUpdateSerializer, ProfessionalSerializer
 from .permissions import IsAdmin
-
-from .services import is_valid_uuid
 
 
 class PatientsView(ListCreateAPIView):

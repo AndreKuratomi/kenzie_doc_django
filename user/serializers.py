@@ -3,6 +3,8 @@ from rest_framework import serializers
 from kenziedoc.exceptions import PatientAlreadyExistsError, UserAlreadyExistsError
 
 from user.models import Patient, User
+from .services import is_valid_uuid
+
 import ipdb
 
 class UserSerializer(serializers.Serializer):
@@ -20,6 +22,15 @@ class UserForPatientSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'password': {'write_only': True}
         }
+
+
+class PatientToUpdateSerializer(serializers.Serializer):
+    user = UserSerializer(read_only=True)
+    cpf = serializers.CharField(required=False)
+    age = serializers.CharField(required=False)
+    sex = serializers.CharField(required=False)
+
+    # users = UserSerializer(many=True)
 
 
 class AddressSerializer(serializers.Serializer):
@@ -73,44 +84,18 @@ class PatientSerializer(serializers.ModelSerializer):
 
         return new_patient
 
-
     # def update(self, validated_data):
-    #     user = User.objects.create_user(email=validated_data['user']['email'], password=validated_data['user']['password'])
-    #     new_patient = Patient.objects.create(user=user, cpf=validated_data['cpf'], age=validated_data['age'], sex=validated_data['sex'])
+        print('Osh!')
+        ipdb.set_trace()
+        # user_to_update = User.objects.update(**validated_data)
+        # user_updated = Patient.objects.get(user_to_update)
 
-    #     return new_patient
-
-
-    # def get(self, request, user_id=''):
-    #     try:
-    #         valid_uuid = is_valid_uuid(user_id)
-    #         if valid_uuid:
-    #             patient = Patient.objects.filter(uuid=user_id)
-    #             serialized = PatientSerializer(patient)
-
-    #             return Response(serialized.data, status=status.HTTP_200_OK)
-
-    #     except Patient.DoesNotExist:
-    #         return Response({"message": "No patient found"}, status=status.HTTP_404_NOT_FOUND)
-    #     except ValueError:
-    #         return Response({"message": "No valid UUID"}, status=status.HTTP_404_NOT_FOUND)
+        # return user_updated
 
     # def patch(self, request, user_id=''):
 
     #     serializer = PatientToUpdateSerializer
 
-    #     try:
-    #         valid_uuid = is_valid_uuid(user_id)
-    #         if valid_uuid:
-    #             patient = Patient.objects.filter(uuid=user_id)
-    #             serialized = PatientSerializer(patient)
-
-    #             return Response(serialized.data, status=status.HTTP_200_OK)
-
-    #     except Patient.DoesNotExist:
-    #         return Response({"message": "No patient found"}, status=status.HTTP_404_NOT_FOUND)
-    #     except ValueError:
-    #         return Response({"message": "No valid UUID"}, status=status.HTTP_404_NOT_FOUND)
 
     #     try:
     #         to_update = Patient.objects.filter(uuid=user_id).update(**serializer.validated_data)
@@ -123,29 +108,6 @@ class PatientSerializer(serializers.ModelSerializer):
     #     serialized = Patient(updated)
 
     #     return Response(serialized.data, status=status.HTTP_200_OK)
-
-    # def delete(self, request, user_id=''):
-    #     try:
-    #         valid_uuid = is_valid_uuid(user_id)
-    #         if valid_uuid:
-    #             patient = Patient.objects.filter(uuid=user_id)
-    #             Patient.delete(patient)
-
-    #             return Response(status=status.HTTP_204_NO_CONTENT)
-
-    #     except Patient.DoesNotExist:
-    #         return Response({"message": "No patient found"}, status=status.HTTP_404_NOT_FOUND)
-    #     except ValueError:
-    #         return Response({"message": "No valid UUID"}, status=status.HTTP_404_NOT_FOUND)
-
-
-class PatientToUpdateSerializer(serializers.Serializer):
-    user = UserSerializer(read_only=True)
-    cpf = serializers.CharField(required=False)
-    age = serializers.CharField(required=False)
-    sex = serializers.CharField(required=False)
-
-    # users = UserSerializer(many=True)
 
 class AdminSerializer(serializers.Serializer):
     name = serializers.CharField()
