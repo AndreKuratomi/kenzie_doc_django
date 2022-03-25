@@ -52,17 +52,14 @@ class PatientSerializer(serializers.ModelSerializer):
         }
 
     def validate(self, attrs):
-        print(attrs)
-        # ipdb.set_trace()
+
         email = attrs['user']['email']
-        print(email)
 
         does_user_already_exists = User.objects.filter(email=email).exists()
         if does_user_already_exists is True:
             raise UserAlreadyExistsError()
 
         cpf = attrs['cpf']
-        print(cpf)
 
         does_patient_already_exists = Patient.objects.filter(cpf=cpf).exists()
         if does_patient_already_exists is True:
@@ -75,6 +72,20 @@ class PatientSerializer(serializers.ModelSerializer):
         new_patient = Patient.objects.create(user=user, cpf=validated_data['cpf'], age=validated_data['age'], sex=validated_data['sex'])
 
         return new_patient
+
+
+    # def list(self, validated_data):
+    #     user = User.objects.create_user(email=validated_data['user']['email'], password=validated_data['user']['password'])
+    #     new_patient = Patient.objects.create(user=user, cpf=validated_data['cpf'], age=validated_data['age'], sex=validated_data['sex'])
+
+    #     return new_patient
+
+
+    # def update(self, validated_data):
+    #     user = User.objects.create_user(email=validated_data['user']['email'], password=validated_data['user']['password'])
+    #     new_patient = Patient.objects.create(user=user, cpf=validated_data['cpf'], age=validated_data['age'], sex=validated_data['sex'])
+
+    #     return new_patient
 
 # class PatientSerializer(serializers.Serializer):
 #     user= UserSerializer(read_only=True)
