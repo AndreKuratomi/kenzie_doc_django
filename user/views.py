@@ -1,7 +1,8 @@
+from cgitb import lookup
 from django.db import IntegrityError
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.generics import ListCreateAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -21,67 +22,15 @@ class PatientsView(ListCreateAPIView):
     # permission_classes = [IsAdmin]
 
 
-class PatientByIdView(APIView):
+class PatientByIdView(RetrieveUpdateDestroyAPIView):
 
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAdmin]
+    queryset = Patient.objects.all()
+    serializer_class = PatientSerializer
 
-    def get(self, request, user_id=''):
-        try:
-            valid_uuid = is_valid_uuid(user_id)
-            if valid_uuid:
-                patient = Patient.objects.filter(uuid=user_id)
-                serialized = PatientSerializer(patient)
+    # authentication_classes = [TokenAuthentication]
+    # permission_classes = [IsAdmin]
 
-                return Response(serialized.data, status=status.HTTP_200_OK)
-
-        except Patient.DoesNotExist:
-            return Response({"message": "No patient found"}, status=status.HTTP_404_NOT_FOUND)
-        except ValueError:
-            return Response({"message": "No valid UUID"}, status=status.HTTP_404_NOT_FOUND)
-
-    def patch(self, request, user_id=''):
-
-        serializer = PatientToUpdateSerializer
-
-        try:
-            valid_uuid = is_valid_uuid(user_id)
-            if valid_uuid:
-                patient = Patient.objects.filter(uuid=user_id)
-                serialized = PatientSerializer(patient)
-
-                return Response(serialized.data, status=status.HTTP_200_OK)
-
-        except Patient.DoesNotExist:
-            return Response({"message": "No patient found"}, status=status.HTTP_404_NOT_FOUND)
-        except ValueError:
-            return Response({"message": "No valid UUID"}, status=status.HTTP_404_NOT_FOUND)
-
-        try:
-            to_update = Patient.objects.filter(uuid=user_id).update(**serializer.validated_data)
-        except IntegrityError:
-            return Response({"message": "This user email already exists"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-
-
-        updated = Patient.objects.get(uuid=user_id)
-
-        serialized = Patient(updated)
-
-        return Response(serialized.data, status=status.HTTP_200_OK)
-
-    def delete(self, request, user_id=''):
-        try:
-            valid_uuid = is_valid_uuid(user_id)
-            if valid_uuid:
-                patient = Patient.objects.filter(uuid=user_id)
-                Patient.delete(patient)
-
-                return Response(status=status.HTTP_204_NO_CONTENT)
-
-        except Patient.DoesNotExist:
-            return Response({"message": "No patient found"}, status=status.HTTP_404_NOT_FOUND)
-        except ValueError:
-            return Response({"message": "No valid UUID"}, status=status.HTTP_404_NOT_FOUND)
+    lookup_url_kwarg = "patient_id"
 
 
 class ProfessionalsView(APIView):
