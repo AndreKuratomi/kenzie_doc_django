@@ -1,5 +1,6 @@
 from email.headerregistry import Address
 from rest_framework import serializers
+from kenziedoc.exceptions import PatientAlreadyExistsError, UserAlreadyExistsError
 
 from user.models import Patient, User
 import ipdb
@@ -31,7 +32,7 @@ class AddressSerializer(serializers.Serializer):
 
 
 class ProfessionalSerializer(serializers.Serializer):
-    user= UserSerializer(read_only=True)
+    user = UserSerializer(read_only=True)
     council_number = serializers.CharField()
     specialty = serializers.CharField()
     address = AddressSerializer(many=True, read_only=True)
@@ -50,10 +51,24 @@ class PatientSerializer(serializers.ModelSerializer):
             'cpf': {'read_only': False}
         }
 
-    # def validate(self, validated_data):
-    #     does_patient_already_exists = Patient.objects.filter(cpf=serializer.validated_data['cpf']).exists()
-    #     if does_patient_already_exists is True:
-    #         return Response({"message": "This patient already exists"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+    def validate(self, attrs):
+        print(attrs)
+        # ipdb.set_trace()
+        email = attrs['user']['email']
+        print(email)
+
+        does_user_already_exists = User.objects.filter(email=email).exists()
+        if does_user_already_exists is True:
+            raise UserAlreadyExistsError()
+
+        cpf = attrs['cpf']
+        print(cpf)
+
+        does_patient_already_exists = Patient.objects.filter(cpf=cpf).exists()
+        if does_patient_already_exists is True:
+            raise PatientAlreadyExistsError()
+
+        return super().validate(attrs)
 
     def create(self, validated_data):
         user = User.objects.create_user(email=validated_data['user']['email'], password=validated_data['user']['password'])
@@ -69,7 +84,7 @@ class PatientSerializer(serializers.ModelSerializer):
 
 
 class PatientToUpdateSerializer(serializers.Serializer):
-    user= UserSerializer(read_only=True)
+    user = UserSerializer(read_only=True)
     cpf = serializers.CharField(required=False)
     age = serializers.CharField(required=False)
     sex = serializers.CharField(required=False)
