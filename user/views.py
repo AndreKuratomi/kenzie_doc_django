@@ -1,6 +1,7 @@
 from django.db import IntegrityError
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
+from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -11,39 +12,46 @@ from .permissions import IsAdmin
 from .services import is_valid_uuid
 
 
-class PatientsView(APIView):
+class PatientsView(CreateAPIView):
 
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAdmin]
+    queryset = Patient.objects.all()
+    serializer_class = PatientSerializer
 
-    def post(self, request):
-        try:
-            serializer = PatientSerializer(data=request.data)
-            data=request.data
+    # authentication_classes = [TokenAuthentication]
+    # permission_classes = [IsAdmin]
 
-            if not serializer.is_valid():
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    # def post(self, request):
+    #     try:
+    #         serializer = PatientSerializer(data=request.data)
+    #         print(serializer)
+    #         data=request.data
+
+    #         if not serializer.is_valid():
+    #             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    #         does_patient_already_exists = Patient.objects.filter(cpf=serializer.validated_data['cpf']).exists()
+    #         if does_patient_already_exists is True:
+    #             return Response({"message": "This patient already exists"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
             
-            does_patient_already_exists = Patient.objects.filter(cpf=serializer.validated_data['cpf']).exists()
-            if does_patient_already_exists is True:
-                return Response({"message": "This patient already exists"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-            
-            user = User.objects.create_user(data['email'], data['password'])
-            new_patient = Patient.objects.create(user=user, **serializer.validated_data)
+    #         user = User.objects.create_user(data['email'], data['password'])
 
-            serialized_new_patient = PatientSerializer(new_patient)
+    #         new_patient = Patient.objects.create(user=user, **serializer.validated_data)
 
-            return Response(serialized_new_patient.data, status=status.HTTP_201_CREATED)
+    #         serialized_new_patient = PatientSerializer(new_patient)
 
-        except:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+    #         return Response(serialized_new_patient.data, status=status.HTTP_201_CREATED)
 
-    def get(self, request):
-        
-        all_patients = Patient.objects.all()
-        serialized_all_patients = PatientSerializer(all_patients, many=True)
+    #     except:
+    #         return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        return Response(serialized_all_patients.data, status=status.HTTP_200_OK)
+
+class PatientsListView(ListAPIView):
+
+    queryset = Patient.objects.all()
+    serialized_class = PatientSerializer
+
+    # authentication_classes = [TokenAuthentication]
+    # permission_classes = [IsAdmin]
 
 
 class PatientByIdView(APIView):
