@@ -4,14 +4,11 @@ from rest_framework import serializers
 from user.models import Patient
 # import uuid
 
-
 class UserSerializer(serializers.Serializer):
     uuid = serializers.UUIDField(read_only=True)
-    is_prof = serializers.BooleanField()
-    is_admin = serializers.BooleanField()
+    is_prof = serializers.BooleanField(write_only=True)
+    is_admin = serializers.BooleanField(write_only=True)
     email = serializers.EmailField()
-    username = serializers.CharField()
-
 
 class AddressSerializer(serializers.Serializer):
     uuid = serializers.UUIDField(read_only=True)
@@ -23,13 +20,7 @@ class AddressSerializer(serializers.Serializer):
 
 
 class ProfessionalSerializer(serializers.Serializer):
-    uuid = serializers.UUIDField(read_only=True)
-    # comentei o username
-    # username = serializers.CharField()
-
-    # pegar outros campos -> (is_prof, is_admin, email, username)?
-    # name = serializers.CharField()
-    # email = serializers.CharField()...
+    user= UserSerializer(read_only=True)
     council_number = serializers.CharField()
     specialty = serializers.CharField()
     address = AddressSerializer(many=True, read_only=True)
@@ -37,21 +28,28 @@ class ProfessionalSerializer(serializers.Serializer):
     users = UserSerializer(many=True)
 
 
-class PatientSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Patient
-        fields = "__all__"
-        # depth = 1
+# class PatientSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Patient
+#         fields = "__all__"
+#         # depth = 1
+
+#     # users = UserSerializer(many=True)
+
+class PatientSerializer(serializers.Serializer):
+    cpf = serializers.CharField()
+    age = serializers.CharField()
+    sex = serializers.CharField()
 
     # users = UserSerializer(many=True)
 
-
 class PatientToUpdateSerializer(serializers.Serializer):
+    user= UserSerializer(read_only=True)
     cpf = serializers.CharField(required=False)
     age = serializers.CharField(required=False)
     sex = serializers.CharField(required=False)
 
-    users = UserSerializer(many=True)
+    # users = UserSerializer(many=True)
 
 class AdminSerializer(serializers.Serializer):
     name = serializers.CharField()

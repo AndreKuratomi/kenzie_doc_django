@@ -5,7 +5,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Patient, Professional
+from .models import Patient, Professional, User
 from .serializers import PatientSerializer, PatientToUpdateSerializer, ProfessionalSerializer
 from .permissions import IsAdmin
 
@@ -35,6 +35,8 @@ class PatientByIdView(APIView):
     def put(self, request):
         try:
             serializer = PatientSerializer(data=request.data)
+            data=request.data
+
             if not serializer.is_valid():
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -42,8 +44,11 @@ class PatientByIdView(APIView):
             if does_patient_already_exists is True:
                 return Response({"message": "This patient already exists"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
-            new_patient = Patient.objects.create(**serializer.validated_data)
-            print(new_patient)
+            # new_patient = Patient.objects.create(**serializer.validated_data)
+            # print(new_patient)
+            
+            user = User.objects.create_user(data['email'], data['password'])
+            new_patient = Patient.objects.create(user=user, **serializer.validated_data)
 
             serialized_new_patient = PatientSerializer(new_patient)
 
@@ -118,6 +123,7 @@ class ProfessionalsView(APIView):
     def post(self, request):
 
         serializer = ProfessionalSerializer(data=request.data)
+        data = request.data
 
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -125,8 +131,8 @@ class ProfessionalsView(APIView):
         if Professional.objects.filter(council_number=serializer.validated_data['council_number']).exists() == True:
             return Response({"message": "This professional already exists"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
-        # professional = Professional.objects.create_user(**serializer.validated_data)
-        professional = Professional.objects.create(**serializer.validated_data)
+        user = User.objects.create_user(data['email'], data['password'], is_prof=True)
+        professional = Professional.objects.create(user=user, council_number=request.data['council_number'], specialty=request.data['specialty'])
 
         # users.set([]) ?
 
