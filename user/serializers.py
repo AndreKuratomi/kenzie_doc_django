@@ -62,8 +62,8 @@ class PatientSerializer(serializers.ModelSerializer):
             'cpf': {'read_only': False}
         }
 
-    def validate(self, attrs):
-
+    def validate(self, attrs, request):
+        # if request.method != "PATCH":
         email = attrs['user']['email']
 
         does_user_already_exists = User.objects.filter(email=email).exists()
@@ -76,7 +76,7 @@ class PatientSerializer(serializers.ModelSerializer):
         if does_patient_already_exists is True:
             raise PatientAlreadyExistsError()
 
-        return super().validate(attrs)
+        return super().validate(attrs, request)
 
     def create(self, validated_data):
         user = User.objects.create_user(email=validated_data['user']['email'], password=validated_data['user']['password'])
@@ -84,30 +84,13 @@ class PatientSerializer(serializers.ModelSerializer):
 
         return new_patient
 
-    # def update(self, validated_data):
-        print('Osh!')
+    def update(self, validated_data):
+        #   ESTÁ CONFUNDINDO COM O CREATE. NÃO PASSA DO VALIDATE
         ipdb.set_trace()
-        # user_to_update = User.objects.update(**validated_data)
-        # user_updated = Patient.objects.get(user_to_update)
+        user_to_update = User.objects.update(**validated_data)
+        user_updated = Patient.objects.get(user_to_update)
 
-        # return user_updated
-
-    # def patch(self, request, user_id=''):
-
-    #     serializer = PatientToUpdateSerializer
-
-
-    #     try:
-    #         to_update = Patient.objects.filter(uuid=user_id).update(**serializer.validated_data)
-    #     except IntegrityError:
-    #         return Response({"message": "This user email already exists"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-
-
-    #     updated = Patient.objects.get(uuid=user_id)
-
-    #     serialized = Patient(updated)
-
-    #     return Response(serialized.data, status=status.HTTP_200_OK)
+        return user_updated
 
 class AdminSerializer(serializers.Serializer):
     name = serializers.CharField()
