@@ -17,10 +17,24 @@ class PatientsView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAdmin]
 
-    def post(self, request):
+
+class PatientsListView(generics.ListAPIView):
+
+    queryset = Patient.objects.all()
+    serialized_class = PatientSerializer
+
+    # authentication_classes = [TokenAuthentication]
+    # permission_classes = [IsAdmin]
+
+
+class PatientByIdView(APIView):
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAdmin]
+
+    def put(self, request):
         try:
             serializer = PatientSerializer(data=request.data)
-
             if not serializer.is_valid():
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -29,6 +43,7 @@ class PatientsView(APIView):
                 return Response({"message": "This patient already exists"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
             new_patient = Patient.objects.create(**serializer.validated_data)
+            print(new_patient)
 
             serialized_new_patient = PatientSerializer(new_patient)
 
@@ -36,21 +51,6 @@ class PatientsView(APIView):
 
         except:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-
-
-class PatientsListView(generics.ListAPIView):
-
-    queryset = Patient.objects.all()
-    serialized_class = PatientSerializer
-
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAdmin]
-
-
-class PatientByIdView(APIView):
-
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAdmin]
 
     def get(self, request, user_id=''):
         try:

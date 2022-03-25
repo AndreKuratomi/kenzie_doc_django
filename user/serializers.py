@@ -41,7 +41,7 @@ class PatientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Patient
         fields = "__all__"
-        depth = 1
+        # depth = 1
 
     # users = UserSerializer(many=True)
 
