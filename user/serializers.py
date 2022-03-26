@@ -2,7 +2,7 @@ from email.headerregistry import Address
 from rest_framework import serializers
 from kenziedoc.exceptions import PatientAlreadyExistsError, UserAlreadyExistsError
 
-from user.models import Patient, User
+from user.models import Patient, User, UserLogin
 from .services import is_valid_uuid
 
 import ipdb
@@ -22,6 +22,11 @@ class UserForPatientSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'password': {'write_only': True}
         }
+
+
+class LoginUserSerializer(serializers.Serializer):
+    email = serializers.CharField()
+    password = serializers.CharField(write_only=True)
 
 
 class PatientToUpdateSerializer(serializers.Serializer):
