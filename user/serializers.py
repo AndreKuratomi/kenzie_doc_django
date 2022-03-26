@@ -35,8 +35,6 @@ class PatientToUpdateSerializer(serializers.Serializer):
     age = serializers.CharField(required=False)
     sex = serializers.CharField(required=False)
 
-    # users = UserSerializer(many=True)
-
 
 class AddressSerializer(serializers.Serializer):
     uuid = serializers.UUIDField(read_only=True)
@@ -52,8 +50,6 @@ class ProfessionalSerializer(serializers.Serializer):
     council_number = serializers.CharField()
     specialty = serializers.CharField()
     address = AddressSerializer(many=True, read_only=True)
-
-    users = UserSerializer(many=True)
 
 
 class PatientSerializer(serializers.ModelSerializer):

@@ -62,7 +62,7 @@ class ProfessionalsView(APIView):
         data = request.data
 
         if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors.keys(), status=status.HTTP_400_BAD_REQUEST)
 
         if Professional.objects.filter(council_number=serializer.validated_data['council_number']).exists() == True:
             return Response({"message": "This professional already exists"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
