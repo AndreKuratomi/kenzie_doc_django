@@ -3,6 +3,8 @@ from rest_framework import serializers
 from kenziedoc.exceptions import PatientAlreadyExistsError, UserAlreadyExistsError
 
 from user.models import Patient, User
+from .services import is_valid_uuid
+
 import ipdb
 
 class UserSerializer(serializers.Serializer):
@@ -20,6 +22,15 @@ class UserForPatientSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'password': {'write_only': True}
         }
+
+
+class PatientToUpdateSerializer(serializers.Serializer):
+    user = UserSerializer(read_only=True)
+    cpf = serializers.CharField(required=False)
+    age = serializers.CharField(required=False)
+    sex = serializers.CharField(required=False)
+
+    # users = UserSerializer(many=True)
 
 
 class AddressSerializer(serializers.Serializer):
@@ -51,8 +62,8 @@ class PatientSerializer(serializers.ModelSerializer):
             'cpf': {'read_only': False}
         }
 
-    def validate(self, attrs):
-
+    def validate(self, attrs, request):
+        # if request.method != "PATCH":
         email = attrs['user']['email']
 
         does_user_already_exists = User.objects.filter(email=email).exists()
@@ -65,7 +76,7 @@ class PatientSerializer(serializers.ModelSerializer):
         if does_patient_already_exists is True:
             raise PatientAlreadyExistsError()
 
-        return super().validate(attrs)
+        return super().validate(attrs, request)
 
     def create(self, validated_data):
         user = User.objects.create_user(email=validated_data['user']['email'], password=validated_data['user']['password'])
@@ -73,34 +84,13 @@ class PatientSerializer(serializers.ModelSerializer):
 
         return new_patient
 
+    def update(self, validated_data):
+        #   ESTÁ CONFUNDINDO COM O CREATE. NÃO PASSA DO VALIDATE
+        ipdb.set_trace()
+        user_to_update = User.objects.update(**validated_data)
+        user_updated = Patient.objects.get(user_to_update)
 
-    # def list(self, validated_data):
-    #     user = User.objects.create_user(email=validated_data['user']['email'], password=validated_data['user']['password'])
-    #     new_patient = Patient.objects.create(user=user, cpf=validated_data['cpf'], age=validated_data['age'], sex=validated_data['sex'])
-
-    #     return new_patient
-
-
-    # def update(self, validated_data):
-    #     user = User.objects.create_user(email=validated_data['user']['email'], password=validated_data['user']['password'])
-    #     new_patient = Patient.objects.create(user=user, cpf=validated_data['cpf'], age=validated_data['age'], sex=validated_data['sex'])
-
-    #     return new_patient
-
-# class PatientSerializer(serializers.Serializer):
-#     user= UserSerializer(read_only=True)
-#     cpf = serializers.CharField()
-#     age = serializers.CharField()
-#     sex = serializers.CharField()
-
-
-class PatientToUpdateSerializer(serializers.Serializer):
-    user = UserSerializer(read_only=True)
-    cpf = serializers.CharField(required=False)
-    age = serializers.CharField(required=False)
-    sex = serializers.CharField(required=False)
-
-    # users = UserSerializer(many=True)
+        return user_updated
 
 class AdminSerializer(serializers.Serializer):
     name = serializers.CharField()
