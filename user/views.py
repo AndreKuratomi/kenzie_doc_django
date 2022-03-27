@@ -1,140 +1,91 @@
+from django.contrib.auth import authenticate
 from django.db import IntegrityError
+
 from rest_framework import status
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.authtoken.models import Token
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authentication import authenticate
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.authtoken.models import Token
 
 from .models import Patient, Professional, User, Admin
-from .serializers import PatientSerializer, PatientToUpdateSerializer, ProfessionalSerializer, AdminSerializer, LoginSerializer
+from .serializers import AdminSerializer, LoginUserSerializer, PatientSerializer, PatientToUpdateSerializer, ProfessionalSerializer
 from .permissions import IsAdmin, ProfessionalsPermissions
 
-from .services import is_valid_uuid
+# import ipdb
 
 
-class PatientsView(APIView):
-
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAdmin]
-
+class LoginUserView(APIView):
     def post(self, request):
-        try:
-            serializer = PatientSerializer(data=request.data)
-            data=request.data
+        serializer = LoginUserSerializer(data=request.data)
 
-            if not serializer.is_valid():
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            
-            does_patient_already_exists = Patient.objects.filter(cpf=serializer.validated_data['cpf']).exists()
-            if does_patient_already_exists is True:
-                return Response({"message": "This patient already exists"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-            
-            user = User.objects.create_user(data['email'], data['password'])
-            new_patient = Patient.objects.create(user=user, **serializer.validated_data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-            serialized_new_patient = PatientSerializer(new_patient)
+        user = authenticate(email=serializer.validated_data['email'], password=serializer.validated_data['password'])
 
-            return Response(serialized_new_patient.data, status=status.HTTP_201_CREATED)
-
-        except:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
-    def get(self, request):
-        
-        all_patients = Patient.objects.all()
-        serialized_all_patients = PatientSerializer(all_patients, many=True)
-
-        return Response(serialized_all_patients.data, status=status.HTTP_200_OK)
+        if user is not None:
+            token = Token.objects.get_or_create(user=user)[0]
+            return Response({'token': token.key})
+        else:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
 
 
-class PatientByIdView(APIView):
+
+class PatientsView(ListCreateAPIView):
+
+    queryset = Patient.objects.all()
+    serializer_class = PatientSerializer
 
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAdmin]
 
-    def get(self, request, user_id=''):
-        try:
-            valid_uuid = is_valid_uuid(user_id)
-            if valid_uuid:
-                patient = Patient.objects.filter(uuid=user_id)
-                serialized = PatientSerializer(patient)
 
-                return Response(serialized.data, status=status.HTTP_200_OK)
+class PatientByIdView(RetrieveUpdateDestroyAPIView):
 
-        except Patient.DoesNotExist:
-            return Response({"message": "No patient found"}, status=status.HTTP_404_NOT_FOUND)
-        except ValueError:
-            return Response({"message": "No valid UUID"}, status=status.HTTP_404_NOT_FOUND)
+    queryset = Patient.objects.all()
+    serializer_class = PatientSerializer
 
-    def patch(self, request, user_id=''):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAdmin]
 
-        serializer = PatientToUpdateSerializer
-
-        try:
-            valid_uuid = is_valid_uuid(user_id)
-            if valid_uuid:
-                patient = Patient.objects.filter(uuid=user_id)
-                serialized = PatientSerializer(patient)
-
-                return Response(serialized.data, status=status.HTTP_200_OK)
-
-        except Patient.DoesNotExist:
-            return Response({"message": "No patient found"}, status=status.HTTP_404_NOT_FOUND)
-        except ValueError:
-            return Response({"message": "No valid UUID"}, status=status.HTTP_404_NOT_FOUND)
-
-        try:
-            to_update = Patient.objects.filter(uuid=user_id).update(**serializer.validated_data)
-        except IntegrityError:
-            return Response({"message": "This user email already exists"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-
-
-        updated = Patient.objects.get(uuid=user_id)
-
-        serialized = Patient(updated)
-
-        return Response(serialized.data, status=status.HTTP_200_OK)
-
-    def delete(self, request, user_id=''):
-        try:
-            valid_uuid = is_valid_uuid(user_id)
-            if valid_uuid:
-                patient = Patient.objects.filter(uuid=user_id)
-                Patient.delete(patient)
-
-                return Response(status=status.HTTP_204_NO_CONTENT)
-
-        except Patient.DoesNotExist:
-            return Response({"message": "No patient found"}, status=status.HTTP_404_NOT_FOUND)
-        except ValueError:
-            return Response({"message": "No valid UUID"}, status=status.HTTP_404_NOT_FOUND)
+    lookup_url_kwarg = "patient_id"
 
 
 class ProfessionalsView(APIView):
 
     authentication_classes = [TokenAuthentication]
-    permission_classes = [ProfessionalsPermissions]
+    permission_classes = [IsAdmin]
 
     def post(self, request):
+        try:
+            serializer = ProfessionalSerializer(data=request.data)
+            data = request.data
 
-        serializer = ProfessionalSerializer(data=request.data)
-        data = request.data
+            if not serializer.is_valid():
+                return Response(serializer.errors.keys(), status=status.HTTP_400_BAD_REQUEST)
 
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            if Professional.objects.filter(council_number=serializer.validated_data['council_number']).exists() == True:
+                return Response({"message": "This professional already exists"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
-        if Professional.objects.filter(council_number=serializer.validated_data['council_number']).exists() == True:
+            user = User.objects.create_user(data['email'], data['password'], is_prof=True)
+            professional = Professional.objects.create(
+                user=user, 
+                council_number=request.data['council_number'], 
+                name=request.data['name'],
+                phone=request.data['phone'],
+                specialty=request.data['specialty']
+                )
+
+            # fazer try/except KeyError
+
+            serializer = ProfessionalSerializer(professional)
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except IntegrityError:
+            # return Response({"message": "This professional already exists"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
             return Response({"message": "This professional already exists"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-
-        user = User.objects.create_user(data['email'], data['password'], is_prof=True)
-        professional = Professional.objects.create(user=user, council_number=request.data['council_number'], specialty=request.data['specialty'])
-
-        # fazer try/except KeyError
-
-        serializer = ProfessionalSerializer(professional)
-
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def get(self, request):
 
@@ -153,21 +104,45 @@ class ProfessionalsByIdView(APIView):
 
         try:
             professional = Professional.objects.get(council_number=council_number)
+            user = User.objects.get(professional=professional)
+
+            if request.user.is_admin == False:
+                if user != request.user:
+                    return Response(
+                        {
+                            "detail": "You do not have permission to perform this action."
+                        },  
+                        status=status.HTTP_401_UNAUTHORIZED
+                    )
+
+            serializer = ProfessionalSerializer(professional)
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
         except Professional.DoesNotExist:
             return Response(
                 {'message': 'Professional does not exist'}, status=status.HTTP_404_NOT_FOUND,
             )
+        # except IntegrityError:
+        #     return Response({"message": "This professional already exists"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
-        serializer = ProfessionalSerializer(professional)
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        
         
 
     def patch(self, request, council_number=''):
 
         try:
             professional = Professional.objects.get(council_number=council_number)
+            user = User.objects.get(professional=professional)
+
+            if request.user.is_admin == False:
+                if user != request.user:
+                    return Response(
+                        {
+                            "detail": "You do not have permission to perform this action."
+                        },  
+                        status=status.HTTP_401_UNAUTHORIZED
+                    )
 
             serialized = ProfessionalSerializer(data=request.data, partial=True)
             serialized.is_valid()
@@ -177,7 +152,8 @@ class ProfessionalsByIdView(APIView):
             if 'council_number' in data:
                 if Professional.objects.filter(council_number=request.data['council_number']).exists() == True:
                     response = {"message": "This council_number already exists"}
-                    return Response(response, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+                    return Response(response, status=status.HTTP_422_UNPROCESSABLE_ENTITY)                   
+                
 
             for key, value in data.items():
                 professional.__dict__[key] = value
@@ -190,15 +166,25 @@ class ProfessionalsByIdView(APIView):
             return Response(serialized.data)        
 
         except Professional.DoesNotExist:
-            return Response(
-                {'message': 'Professional does not exist'}, status=status.HTTP_404_NOT_FOUND,
-            )
+            return Response({'message': 'Professional does not exist'}, status=status.HTTP_404_NOT_FOUND)
     
 
     def delete(self, request, council_number=''):
 
         try:
-            professional = Professional.objects.get(council_number=council_number).delete()
+            professional = Professional.objects.get(council_number=council_number)
+            user = User.objects.get(professional=professional)
+
+            if request.user.is_admin == False:
+                if user != request.user:
+                    return Response(
+                        {
+                            "detail": "You do not have permission to perform this action."
+                        },  
+                        status=status.HTTP_401_UNAUTHORIZED
+                    )
+                
+            professional.delete()
 
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Professional.DoesNotExist:
@@ -238,39 +224,3 @@ class AdminView(APIView):
 
         return Response(serialized.data, status=status.HTTP_200_OK)
 
-class LoginView(APIView):
-
-    # def post(self, request):
-
-        # serializer = LoginSerializer(data=request.data)
-
-        # if not serializer.is_valid():
-        #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            
-        # user = authenticate(email=request.data['email'], password=request.data['password'])
-
-        # if user:
-        #     token = Token.objects.get_or_create(user=user)[0]
-        #     return Response({'token': token.key})          
-        # if not user:
-        #     return Response(status=status.HTTP_401_UNAUTHORIZED)
-
-    def post(self, request):
-        try:
-            serialized = LoginSerializer(data=request.data)
-
-            serialized.is_valid()      
-
-            email = request.data['email']
-            password = request.data['password']
-            
-        except KeyError:
-            return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
-        user = authenticate(email=email, password=password)
-
-        if user:
-            token = Token.objects.get_or_create(user=user)[0]
-
-            return Response({'token': token.key})
-
-        return Response({'message': 'Invalid Credentials'}, status=status.HTTP_401_UNAUTHORIZED)

@@ -38,6 +38,12 @@ class User(AbstractUser):
 
     objects = UsersModel()
 
+
+class UserLogin(models.Model):
+    email = models.EmailField(max_length=255, unique=True)
+    password = models.CharField(max_length=255, unique=False)
+
+
 class Address(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     street = models.CharField(max_length=255)
@@ -46,13 +52,17 @@ class Address(models.Model):
 
 class Patient(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    cpf = models.CharField(primary_key=True, max_length=11, editable=False)
+    # cpf = models.CharField(primary_key=True, max_length=11, editable=False)
+    # name = models.CharField(max_length=255)
+    # phone = models.CharField(max_length=255)
     age = models.CharField(max_length=255)
     sex = models.CharField(max_length=255)
 
 class Professional(models.Model):
-    council_number = models.CharField(primary_key=True, max_length=8, editable=False)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    council_number = models.CharField(primary_key=True, max_length=8, editable=False)
+    name = models.CharField(max_length=255)
+    phone = models.CharField(max_length=255)
     specialty = models.CharField(max_length=255)
     patients = models.ManyToManyField(Patient)
 
