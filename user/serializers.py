@@ -18,12 +18,13 @@ class AddressSerializer(serializers.Serializer):
 
 
 class ProfessionalSerializer(serializers.Serializer):
-    user= UserSerializer(read_only=True)
+    user = UserSerializer(read_only=True)
     council_number = serializers.CharField()
     specialty = serializers.CharField()
     address = AddressSerializer(many=True, read_only=True)
 
 class PatientSerializer(serializers.Serializer):
+    user = UserSerializer(read_only=True)
     cpf = serializers.CharField()
     age = serializers.CharField()
     sex = serializers.CharField()
@@ -31,7 +32,7 @@ class PatientSerializer(serializers.Serializer):
     # users = UserSerializer(many=True)
 
 class PatientToUpdateSerializer(serializers.Serializer):
-    user= UserSerializer(read_only=True)
+    user = UserSerializer(read_only=True)
     cpf = serializers.CharField(required=False)
     age = serializers.CharField(required=False)
     sex = serializers.CharField(required=False)
@@ -39,5 +40,10 @@ class PatientToUpdateSerializer(serializers.Serializer):
     # users = UserSerializer(many=True)
 
 class AdminSerializer(serializers.Serializer):
+    user = UserSerializer(read_only=True)
     name = serializers.CharField()
     password = serializers.CharField(write_only=True)
+
+class LoginSerializer(serializers.Serializer):
+  email = serializers.EmailField()
+  password = serializers.CharField()    

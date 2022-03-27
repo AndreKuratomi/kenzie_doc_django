@@ -1,12 +1,14 @@
 from django.db import IntegrityError
 from rest_framework import status
-from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.authentication import authenticate
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.authtoken.models import Token
 
-from .models import Patient, Professional, User
-from .serializers import PatientSerializer, PatientToUpdateSerializer, ProfessionalSerializer
-from .permissions import IsAdmin
+from .models import Patient, Professional, User, Admin
+from .serializers import PatientSerializer, PatientToUpdateSerializer, ProfessionalSerializer, AdminSerializer, LoginSerializer
+from .permissions import IsAdmin, ProfessionalsPermissions
 
 from .services import is_valid_uuid
 
@@ -111,8 +113,8 @@ class PatientByIdView(APIView):
 
 class ProfessionalsView(APIView):
 
-    # authentication_classes = [TokenAuthentication]
-    # permission_classes = [IsAdmin]
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [ProfessionalsPermissions]
 
     def post(self, request):
 
@@ -128,7 +130,7 @@ class ProfessionalsView(APIView):
         user = User.objects.create_user(data['email'], data['password'], is_prof=True)
         professional = Professional.objects.create(user=user, council_number=request.data['council_number'], specialty=request.data['specialty'])
 
-        # users.set([]) ?
+        # fazer try/except KeyError
 
         serializer = ProfessionalSerializer(professional)
 
@@ -144,8 +146,8 @@ class ProfessionalsView(APIView):
 
 class ProfessionalsByIdView(APIView):
 
-    # authentication_classes = [TokenAuthentication]
-    # permission_classes = [IsAdmin]
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [ProfessionalsPermissions]
 
     def get(self, request, council_number=''):
 
@@ -182,7 +184,7 @@ class ProfessionalsByIdView(APIView):
             
             professional.save()
 
-            professional = Professional.objects.get(uuid=council_number)
+            professional = Professional.objects.get(council_number=council_number)
             serialized = ProfessionalSerializer(professional)
 
             return Response(serialized.data)        
@@ -201,3 +203,74 @@ class ProfessionalsByIdView(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Professional.DoesNotExist:
             return Response({"message": "Professional does not exist"}, status=status.HTTP_404_NOT_FOUND)
+
+
+class AdminView(APIView):
+
+    def post(self, request):
+        try:
+            serializer = AdminSerializer(data=request.data)
+            data = request.data
+
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+            # if Admin.objects.filter(name=serializer.validated_data['name']).exists() == True:
+            #     return Response({"message": "This admin already exists"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+            user = User.objects.create_user(data['email'], data['password'], is_admin=True)
+
+            admin = Admin.objects.create(user=user, name=request.data['name'])
+
+            # fazer try/except KeyError
+
+            serializer = AdminSerializer(admin)
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except IntegrityError:
+            return Response({"message": "This admin already exists"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+    def get(self, request):
+
+        admin = Admin.objects.all()
+
+        serialized = AdminSerializer(admin, many=True)
+
+        return Response(serialized.data, status=status.HTTP_200_OK)
+
+class LoginView(APIView):
+
+    # def post(self, request):
+
+        # serializer = LoginSerializer(data=request.data)
+
+        # if not serializer.is_valid():
+        #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
+        # user = authenticate(email=request.data['email'], password=request.data['password'])
+
+        # if user:
+        #     token = Token.objects.get_or_create(user=user)[0]
+        #     return Response({'token': token.key})          
+        # if not user:
+        #     return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+    def post(self, request):
+        try:
+            serialized = LoginSerializer(data=request.data)
+
+            serialized.is_valid()      
+
+            email = request.data['email']
+            password = request.data['password']
+            
+        except KeyError:
+            return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
+        user = authenticate(email=email, password=password)
+
+        if user:
+            token = Token.objects.get_or_create(user=user)[0]
+
+            return Response({'token': token.key})
+
+        return Response({'message': 'Invalid Credentials'}, status=status.HTTP_401_UNAUTHORIZED)

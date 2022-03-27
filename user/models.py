@@ -56,3 +56,7 @@ class Professional(models.Model):
     specialty = models.CharField(max_length=255)
     patients = models.ManyToManyField(Patient)
 
+class Admin(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+
