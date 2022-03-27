@@ -64,7 +64,7 @@ class ProfessionalsView(APIView):
             data = request.data
 
             if not serializer.is_valid():
-                return Response(serializer.errors.keys(), status=status.HTTP_400_BAD_REQUEST)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
             if Professional.objects.filter(council_number=serializer.validated_data['council_number']).exists() == True:
                 return Response({"message": "This professional already exists"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
@@ -78,13 +78,10 @@ class ProfessionalsView(APIView):
                 specialty=request.data['specialty']
                 )
 
-            # fazer try/except KeyError
-
             serializer = ProfessionalSerializer(professional)
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except IntegrityError:
-            # return Response({"message": "This professional already exists"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
             return Response({"message": "This professional already exists"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
     def get(self, request):
@@ -122,11 +119,7 @@ class ProfessionalsByIdView(APIView):
         except Professional.DoesNotExist:
             return Response(
                 {'message': 'Professional does not exist'}, status=status.HTTP_404_NOT_FOUND,
-            )
-        # except IntegrityError:
-        #     return Response({"message": "This professional already exists"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-
-        
+            )        
         
 
     def patch(self, request, council_number=''):
@@ -200,9 +193,6 @@ class AdminView(APIView):
 
             if not serializer.is_valid():
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-            # if Admin.objects.filter(name=serializer.validated_data['name']).exists() == True:
-            #     return Response({"message": "This admin already exists"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
             user = User.objects.create_user(data['email'], data['password'], is_admin=True)
 
