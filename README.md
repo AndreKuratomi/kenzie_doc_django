@@ -1,4 +1,4 @@
-## KenzieDoc
+## KENZIEDOC DJANGO
 
 - [Sobre](#sobre)
 - [Instalação](#instalação)
