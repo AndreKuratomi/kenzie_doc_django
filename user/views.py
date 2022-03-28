@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate
 from django.db import IntegrityError
+from datetime import date, datetime, time, timedelta
 
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
@@ -14,6 +15,7 @@ from .serializers import AdminSerializer, LoginUserSerializer, PatientSerializer
 from .permissions import IsAdmin, ProfessionalsPermissions
 
 # import ipdb
+import pywhatkit
 
 
 class LoginUserView(APIView):
@@ -77,6 +79,13 @@ class ProfessionalsView(APIView):
                 phone=request.data['phone'],
                 specialty=request.data['specialty']
                 )
+
+            # whats_msg = "Professional criado com sucesso"
+
+            # time_to_send = datetime.now() + timedelta(minutes=1)
+
+            # pywhatkit.sendwhatmsg("+5519997416761", whats_msg, time_to_send.hour,time_to_send.minute)
+            # pywhatkit.sendwhatmsg_instantly("+5519997416761", whats_msg)
 
             serializer = ProfessionalSerializer(professional)
 
