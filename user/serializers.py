@@ -5,7 +5,7 @@ from kenziedoc.exceptions import PatientAlreadyExistsError, UserAlreadyExistsErr
 from user.models import Patient, User
 from .services import is_valid_uuid
 
-# import ipdb
+import ipdb
 
 class UserSerializer(serializers.Serializer):
     uuid = serializers.UUIDField(read_only=True)
@@ -66,6 +66,7 @@ class PatientSerializer(serializers.ModelSerializer):
         }
 
     def validate(self, attrs):
+
         email = attrs['user']['email']
 
         does_user_already_exists = User.objects.filter(email=email).exists()
