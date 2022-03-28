@@ -66,7 +66,7 @@ class PatientSerializer(serializers.ModelSerializer):
         }
 
     def validate(self, attrs):
-        # ipdb.set_trace()
+
         email = attrs['user']['email']
 
         does_user_already_exists = User.objects.filter(email=email).exists()
