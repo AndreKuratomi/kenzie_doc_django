@@ -79,7 +79,7 @@ https://insomnia-abkura.vercel.app/
 # Desenvolvedores da API
 
 <div>
-    <p>Pierre Kalil - Techlead</p>
+    <span>Pierre Kalil - Techlead</span>
     <a href="https://www.linkedin.com/in/pierre-kalil/" target="_blank" ><img src="https://img.shields.io/badge/-LinkedIn-%230077B5?style=for-the-badge&logo=linkedin&logoColor=white" target="_blank"></a> 
     <a href = "https://github.com/Pierre-Kalil"><img src="https://www.kindpng.com/picc/m/128-1280187_github-logo-png-github-transparent-png.png" width= 106px height=27px target="_blank"> </a>
 </div>
@@ -87,7 +87,7 @@ https://insomnia-abkura.vercel.app/
 <br>
 
 <div>
-    <p>Leonardo Pereira - Product Owner</p>
+    <span>Leonardo Pereira - Product Owner</span>
     <a href="https://www.linkedin.com/in/leonardo-m-pereira/" target="_blank" ><img src="https://img.shields.io/badge/-LinkedIn-%230077B5?style=for-the-badge&logo=linkedin&logoColor=white" target="_blank"></a> 
     <a href = "https://github.com/leokito"><img src="https://www.kindpng.com/picc/m/128-1280187_github-logo-png-github-transparent-png.png" width= 106px height=27px target="_blank"> </a>
 </div>
@@ -95,13 +95,13 @@ https://insomnia-abkura.vercel.app/
 <br>
 
 <div>
-    <p>André Kuratomi - Scrum Master</p>
+    <span>André Kuratomi - Scrum Master</span>
     <a href="https://www.linkedin.com/in/andre-kuratomi/" target="_blank" ><img src="https://img.shields.io/badge/-LinkedIn-%230077B5?style=for-the-badge&logo=linkedin&logoColor=white" target="_blank"></a>
     <a href = "https://github.com/AndreKuratomi"><img src="https://www.kindpng.com/picc/m/128-1280187_github-logo-png-github-transparent-png.png" width= 106px height=27px target="_blank"> </a>
 </div>
 
 <div>
-    <p>Keila Passos - Developer</p> 
+    <span>Keila Passos - Developer</span> 
     <a href="https://www.linkedin.com/in/keila-aparecida-rodrigues-passos" target="_blank" ><img src="https://img.shields.io/badge/-LinkedIn-%230077B5?style=for-the-badge&logo=linkedin&logoColor=white" target="_blank"></a> 
     <a href = "https://github.com/keilapassos"><img src="https://www.kindpng.com/picc/m/128-1280187_github-logo-png-github-transparent-png.png" width= 106px height=27px target="_blank"> </a>
 </div>
@@ -109,7 +109,7 @@ https://insomnia-abkura.vercel.app/
 <br>
 
 <div></div>
-<p>Kaio Iwakiri - Developer</p>
+<span>Kaio Iwakiri - Developer</span>
 <a href="https://www.linkedin.com/in/kaio-iwakiri/" target="_blank" ><img src="https://img.shields.io/badge/-LinkedIn-%230077B5?style=for-the-badge&logo=linkedin&logoColor=white" target="_blank"></a> 
   <a href = "gitlab.com/KaioIwakiri"><img src="https://www.kindpng.com/picc/m/128-1280187_github-logo-png-github-transparent-png.png" width= 106px height=27px target="_blank"> </a>
 
