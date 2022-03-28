@@ -63,7 +63,7 @@ class PatientSerializer(serializers.ModelSerializer):
             'cpf': {'read_only': False}
         }
 
-    def validate(self, attrs, request):
+    def validate(self, attrs):
         # if request.method != "PATCH":
         email = attrs['user']['email']
 
@@ -77,7 +77,7 @@ class PatientSerializer(serializers.ModelSerializer):
         if does_patient_already_exists is True:
             raise PatientAlreadyExistsError()
 
-        return super().validate(attrs, request)
+        return super().validate(attrs)
 
     def create(self, validated_data):
         user = User.objects.create_user(email=validated_data['user']['email'], password=validated_data['user']['password'])
