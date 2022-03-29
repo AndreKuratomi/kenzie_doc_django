@@ -88,6 +88,7 @@ class CreateAppointment(APIView):
     permission_classes = [AppointmentPermission]
 
     def post(self, request):
+<<<<<<< HEAD
         print("====reques.data=======")
         print(request.data)
         # try:
@@ -131,6 +132,34 @@ class CreateAppointment(APIView):
         #         {"message": "Professional not registered"},
         #         status=status.HTTP_404_NOT_FOUND,
         #     )
+=======
+        try:
+
+            professional = Professional.objects.get(council_number=request.data['professional'])
+            print(professional.user.email)
+            patient = Patient.objects.get(cpf=request.data['patient'])
+
+            date = datetime.strptime(request["date"], "%Y-%m-%dT%H:%M:%SZ")
+
+            serializer = AppointmentsSerializer(
+                data=request.data, professional=professional, patient=patient, date=date
+            )
+
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+            appointment = AppointmentsModel.objects.create(**serializer.validated_data)
+            serializer = AppointmentsSerializer(appointment)
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        # except Professional.ObjectDoesNotExist:
+        except ObjectDoesNotExist:
+            return Response(
+                {"message": "Professional not registered"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+>>>>>>> 2bb420c39e12bcb2f677c202866cef2698551690
 
         # except Patient.ObjectDoesNotExist:
         #     return Response(
