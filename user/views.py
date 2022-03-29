@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from rest_framework.authentication import authenticate
 
 from .models import Patient, Professional, User, Admin
-from .serializers import AdminSerializer, LoginUserSerializer, PatientSerializer, PatientToUpdateSerializer, ProfessionalSerializer
+from .serializers import AdminSerializer, LoginUserSerializer, PatientIdSerializer, PatientSerializer, ProfessionalSerializer
 from .permissions import IsAdmin, ProfessionalsPermissions
 
 # import ipdb
@@ -44,7 +44,7 @@ class PatientsView(ListCreateAPIView):
 class PatientByIdView(RetrieveUpdateDestroyAPIView):
 
     queryset = Patient.objects.all()
-    serializer_class = PatientSerializer
+    serializer_class = PatientIdSerializer
 
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAdmin]
@@ -211,4 +211,3 @@ class AdminView(APIView):
         serialized = AdminSerializer(admin, many=True)
 
         return Response(serialized.data, status=status.HTTP_200_OK)
-
