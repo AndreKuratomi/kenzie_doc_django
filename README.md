@@ -74,7 +74,7 @@ code .
 
 Para ter acesso ao descrições detalhes das rotas e seus retornos, conferir documentação completa no link a seguir:
 
-https://insomnia-abkura.vercel.app/
+https://kenziedoc-django-api-documentation.vercel.app/
 
 # Desenvolvedores da API
 
