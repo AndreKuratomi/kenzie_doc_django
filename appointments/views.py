@@ -90,9 +90,9 @@ class CreateAppointment(APIView):
     def post(self, request):
         try:
 
-            professional = Professional.objects.get(council_number=request.professional)
-
-            patient = Patient.objects.get(cpf=request.patient)
+            professional = Professional.objects.get(council_number=request.data['professional'])
+            print(professional.user.email)
+            patient = Patient.objects.get(cpf=request.data['patient'])
 
             date = datetime.strptime(request["date"], "%Y-%m-%dT%H:%M:%SZ")
 
@@ -108,13 +108,14 @@ class CreateAppointment(APIView):
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        except Professional.ObjectDoesNotExist:
+        # except Professional.ObjectDoesNotExist:
+        except ObjectDoesNotExist:
             return Response(
                 {"message": "Professional not registered"},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        except Patient.ObjectDoesNotExist:
-            return Response(
-                {"message": "Patient not registered"}, status=status.HTTP_404_NOT_FOUND
-            )
+        # except Patient.ObjectDoesNotExist:
+        #     return Response(
+        #         {"message": "Patient not registered"}, status=status.HTTP_404_NOT_FOUND
+        #     )
