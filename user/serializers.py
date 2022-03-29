@@ -89,19 +89,24 @@ class PatientIdSerializer(serializers.ModelSerializer):
         model = Patient
         fields = "__all__"
 
-    # def update(self, validated_data):
-    #     # ipdb.set_trace()
-    #     user_to_update = User.objects.update(email=validated_data['user']['email'], password=validated_data['user']['password'])
-    #     user_updated = Patient.objects.get(user_to_update)
+    def update(self, instance, validated_data):
+        # ipdb.set_trace()
+        user_data = validated_data.pop('user')
+        user = User.objects.filter(uuid=instance.user.uuid).update(**user_data)
+        patient = Patient.objects.filter(cpf=instance.cpf).update(**validated_data)
 
-    #     return user_updated
+        updated_patient = Patient.objects.get(cpf=instance.cpf)
+        # user = validated_data.get('user', instance.user)
+        # instance.user.email = user['email']
+        # instance.user.password = validated_data.get('password', instance.user.password)
+        # instance.age = validated_data.get('age', instance.age)
 
+        return updated_patient
 
-# class PatientToUpdateSerializer(serializers.Serializer):
-#     user = UserSerializer(read_only=True)
-#     cpf = serializers.CharField(required=False)
-#     age = serializers.CharField(required=False)
-#     sex = serializers.CharField(required=False)
+    # def delete(self, instance, validated_data):
+    #     user_data = validated_data.pop('user')
+    #     user = User.objects.filter(uuid=instance.user.uuid).delete(**user_data)
+    #     patient = Patient.objects.filter(cpf=instance.cpf).delete(**validated_data)
 
 
 class AdminSerializer(serializers.Serializer):
