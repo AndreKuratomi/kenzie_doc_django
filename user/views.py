@@ -85,7 +85,6 @@ class ProfessionalsView(APIView):
             # time_to_send = datetime.now() + timedelta(minutes=1)
 
             # pywhatkit.sendwhatmsg("+5519997416761", whats_msg, time_to_send.hour,time_to_send.minute)
-            # pywhatkit.sendwhatmsg_instantly("+5519997416761", whats_msg)
 
             serializer = ProfessionalSerializer(professional)
 

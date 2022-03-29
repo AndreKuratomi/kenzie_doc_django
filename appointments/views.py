@@ -88,33 +88,51 @@ class CreateAppointment(APIView):
     permission_classes = [AppointmentPermission]
 
     def post(self, request):
-        try:
+        print("====reques.data=======")
+        print(request.data)
+        # try:
 
-            professional = Professional.objects.get(council_number=request.professional)
+        professional = Professional.objects.get(council_number=request.data['professional']['council_number'])
+        print("======professional")
+        print(professional)
 
-            patient = Patient.objects.get(cpf=request.patient)
+        # patient = Patient.objects.get(cpf=request.patient)
+        patient = Patient.objects.get(cpf=request.data['patient']['cpf'])
+        print("======patient")
+        print(patient)
 
-            date = datetime.strptime(request["date"], "%Y-%m-%dT%H:%M:%SZ")
+        date = datetime.strptime(request.data["date"], "%Y-%m-%dT%H:%M:%SZ")
 
-            serializer = AppointmentsSerializer(
-                data=request.data, professional=professional, patient=patient, date=date
-            )
+        serializer = AppointmentsSerializer(
+            # data=request.data, 
+            professional=request.data['professional']['council_number'], 
+            patient=request.data['patient']['cpf'], 
+            date=request.data['date'],
+            complaint=request.data['complaint'],
+            finished=request.data['finished']
+        )
 
-            if not serializer.is_valid():
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        print("======serializer valid?")
+        print(serializer.is_valid())
+        print("======após serializer 1")
+        # serializer = AppointmentsSerializer(data=request.data)
+        
 
-            appointment = AppointmentsModel.objects.create(**serializer.validated_data)
-            serializer = AppointmentsSerializer(appointment)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        appointment = AppointmentsModel.objects.create(**serializer.validated_data)
+        serializer = AppointmentsSerializer(appointment)
 
-        except Professional.ObjectDoesNotExist:
-            return Response(
-                {"message": "Professional not registered"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        except Patient.ObjectDoesNotExist:
-            return Response(
-                {"message": "Patient not registered"}, status=status.HTTP_404_NOT_FOUND
-            )
+        # except Professional.ObjectDoesNotExist:
+        #     return Response(
+        #         {"message": "Professional not registered"},
+        #         status=status.HTTP_404_NOT_FOUND,
+        #     )
+
+        # except Patient.ObjectDoesNotExist:
+        #     return Response(
+        #         {"message": "Patient not registered"}, status=status.HTTP_404_NOT_FOUND
+        #     )
