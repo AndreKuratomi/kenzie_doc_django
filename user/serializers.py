@@ -95,6 +95,7 @@ class PatientSerializer(serializers.ModelSerializer):
 
         return user_updated
 
+
 class AdminSerializer(serializers.Serializer):
     user = UserSerializer(read_only=True)
     name = serializers.CharField()

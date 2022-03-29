@@ -38,11 +38,9 @@ class User(AbstractUser):
 
     objects = UsersModel()
 
-
 class UserLogin(models.Model):
     email = models.EmailField(max_length=255, unique=True)
     password = models.CharField(max_length=255, unique=False)
-
 
 class Address(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

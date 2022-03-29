@@ -32,7 +32,6 @@ class LoginUserView(APIView):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
 
 
-
 class PatientsView(ListCreateAPIView):
 
     queryset = Patient.objects.all()
@@ -91,6 +90,7 @@ class ProfessionalsView(APIView):
         serialized = ProfessionalSerializer(professionals, many=True)
 
         return Response(serialized.data, status=status.HTTP_200_OK)
+
 
 class ProfessionalsByIdView(APIView):
 
@@ -197,8 +197,6 @@ class AdminView(APIView):
             user = User.objects.create_user(data['email'], data['password'], is_admin=True)
 
             admin = Admin.objects.create(user=user, name=request.data['name'])
-
-            # fazer try/except KeyError
 
             serializer = AdminSerializer(admin)
 
