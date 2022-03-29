@@ -53,6 +53,7 @@ class Address(models.Model):
 class Patient(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     cpf = models.CharField(primary_key=True, max_length=11, editable=False)
+
     age = models.CharField(max_length=255)
     sex = models.CharField(max_length=255)
 
