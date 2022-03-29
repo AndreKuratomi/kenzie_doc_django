@@ -1,5 +1,6 @@
 from django.db import models
 import uuid
+from user.models import Patient, Professional
 
 
 class AppointmentsModel(models.Model):
@@ -11,5 +12,5 @@ class AppointmentsModel(models.Model):
         "user.Patient", related_name="appointment", on_delete=models.CASCADE
     )
     professional = models.OneToOneField(
-        "user.Professional", related_name="appointments", on_delete=models.CASCADE
+        "user.Professional", related_name="appointment", on_delete=models.CASCADE
     )

@@ -11,7 +11,7 @@ from rest_framework.decorators import authentication_classes, permission_classes
 from .models import AppointmentsModel
 from .serializers import AppointmentsSerializer
 from .permissions import AppointmentPermission
-from user.models import Patient, Professional
+from user.models import Patient, Professional, User
 from user.serializers import PatientSerializer
 
 
@@ -88,16 +88,17 @@ class CreateAppointment(APIView):
     permission_classes = [AppointmentPermission]
 
     def post(self, request):
+        print("+++")
+        print(request.data['patient']['cpf'])
         try:
 
-            professional = Professional.objects.get(council_number=request.professional)
-
-            patient = Patient.objects.get(cpf=request.patient)
-
-            date = datetime.strptime(request["date"], "%Y-%m-%dT%H:%M:%SZ")
+            professional = Professional.objects.get(council_number=request.data['professional'])
+            patient =  Patient.objects.get(cpf='')
+            print(patient, '+'*100)
+            # date = datetime.strptime(request.data["date"], "%Y-%m-%dT%H:%M:%SZ")
 
             serializer = AppointmentsSerializer(
-                data=request.data, professional=professional, patient=patient, date=date
+                data=request.data,
             )
 
             if not serializer.is_valid():
@@ -108,13 +109,13 @@ class CreateAppointment(APIView):
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        except Professional.ObjectDoesNotExist:
-            return Response(
-                {"message": "Professional not registered"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+        # except Professional.ObjectDoesNotExist:
+        #     return Response(
+        #         {"message": "Professional not registered"},
+        #         status=status.HTTP_404_NOT_FOUND,
+        #     )
 
-        except Patient.ObjectDoesNotExist:
+        except ObjectDoesNotExist:
             return Response(
                 {"message": "Patient not registered"}, status=status.HTTP_404_NOT_FOUND
             )
