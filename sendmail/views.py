@@ -9,12 +9,11 @@ from sendmail.serializers import EmailSerializer
 class EmailView(APIView):
     def post(self, request):
 
-        # serializer = EmailSerializer(data=request.data)
+        serializer = EmailSerializer(data=request.data)
 
-        # if not serializer.is_valid():
-        #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         send_mail(request.data['subject'],request.data["message"], request.data["sender"], request.data["receiver"])
-        # send_mail(subject=serializer['subject'], message=serializer['subject'], sender=serializer['sender'], receiver=serializer['receiver'])
 
-        return Response({"message": "Email sent"}, status=status.HTTP_200_OK)
+        return Response({"message": "Email successfully sent"}, status=status.HTTP_200_OK)
