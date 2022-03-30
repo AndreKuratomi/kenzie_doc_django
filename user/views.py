@@ -14,8 +14,6 @@ from .serializers import AdminSerializer, LoginUserSerializer, PatientIdSerializ
 from .permissions import IsAdmin, ProfessionalsPermissions
 
 # import ipdb
-
-
 class LoginUserView(APIView):
     def post(self, request):
         serializer = LoginUserSerializer(data=request.data)
@@ -30,8 +28,6 @@ class LoginUserView(APIView):
             return Response({'token': token.key})
         else:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
-
-
 
 class PatientsView(ListCreateAPIView):
 
