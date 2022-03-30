@@ -107,14 +107,18 @@ class CreateAppointment(APIView):
         date = datetime.strptime(request.data["date"], "%Y-%m-%dT%H:%M:%SZ")
         data=request.data
 
-        # prof = AppProfessonalSerializer(professional)
-        # pat = AppPatientSerializer(patient)
+        prof = AppProfessonalSerializer(professional)
+        pat = AppPatientSerializer(patient)
 
-        data['professional'] = professional.council_number
-        data['patient'] = patient.cpf
+        data['professional'] = prof.data
+        data['patient'] = pat.data
+
         print(data)
         print(user_prof)
         print(user_pat)
+        print("=============")
+        print( pat.data)
+        print( prof.data)
 
         
 

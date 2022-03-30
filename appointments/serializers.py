@@ -22,6 +22,6 @@ class AllAppointmentsSerializer(serializers.Serializer):
     date = serializers.DateTimeField()
     complaint = serializers.CharField()
     finished = serializers.BooleanField()
-    patient = serializers.RelatedField()
-    professional = serializers.RelatedField()
+    patient = PatientSerializer()
+    professional = ProfessionalSerializer()
 
