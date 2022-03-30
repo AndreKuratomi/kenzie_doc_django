@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate
 from django.db import IntegrityError
+from datetime import date, datetime, time, timedelta
 
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
@@ -10,10 +11,11 @@ from rest_framework.views import APIView
 from rest_framework.authentication import authenticate
 
 from .models import Patient, Professional, User, Admin
-from .serializers import AdminSerializer, LoginUserSerializer, PatientSerializer, PatientToUpdateSerializer, ProfessionalSerializer
+from .serializers import AdminSerializer, LoginUserSerializer, PatientIdSerializer, PatientSerializer, ProfessionalSerializer
 from .permissions import IsAdmin, ProfessionalsPermissions
 
 # import ipdb
+# import pywhatkit
 
 
 class LoginUserView(APIView):
@@ -31,8 +33,6 @@ class LoginUserView(APIView):
         else:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
 
-
-
 class PatientsView(ListCreateAPIView):
 
     queryset = Patient.objects.all()
@@ -45,7 +45,7 @@ class PatientsView(ListCreateAPIView):
 class PatientByIdView(RetrieveUpdateDestroyAPIView):
 
     queryset = Patient.objects.all()
-    serializer_class = PatientSerializer
+    serializer_class = PatientIdSerializer
 
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAdmin]
@@ -77,7 +77,7 @@ class ProfessionalsView(APIView):
                 phone=request.data['phone'],
                 specialty=request.data['specialty']
                 )
-
+          
             serializer = ProfessionalSerializer(professional)
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -177,7 +177,7 @@ class ProfessionalsByIdView(APIView):
                         status=status.HTTP_401_UNAUTHORIZED
                     )
                 
-            professional.delete()
+            user.delete()
 
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Professional.DoesNotExist:
@@ -198,8 +198,6 @@ class AdminView(APIView):
 
             admin = Admin.objects.create(user=user, name=request.data['name'])
 
-            # fazer try/except KeyError
-
             serializer = AdminSerializer(admin)
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -213,4 +211,3 @@ class AdminView(APIView):
         serialized = AdminSerializer(admin, many=True)
 
         return Response(serialized.data, status=status.HTTP_200_OK)
-

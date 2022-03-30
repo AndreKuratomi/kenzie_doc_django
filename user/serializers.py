@@ -5,13 +5,16 @@ from kenziedoc.exceptions import PatientAlreadyExistsError, UserAlreadyExistsErr
 from user.models import Patient, User
 from .services import is_valid_uuid
 
-import ipdb
+# import ipdb
+
 
 class UserSerializer(serializers.Serializer):
     uuid = serializers.UUIDField(read_only=True)
     is_prof = serializers.BooleanField(write_only=True)
     is_admin = serializers.BooleanField(write_only=True)
     email = serializers.EmailField()
+    # name = serializers.CharField()
+    # phone = serializers.CharField()
 
 
 class UserForPatientSerializer(serializers.ModelSerializer):
@@ -29,13 +32,6 @@ class LoginUserSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
 
-class PatientToUpdateSerializer(serializers.Serializer):
-    user = UserSerializer(read_only=True)
-    cpf = serializers.CharField(required=False)
-    age = serializers.CharField(required=False)
-    sex = serializers.CharField(required=False)    
-
-
 class AddressSerializer(serializers.Serializer):
     uuid = serializers.UUIDField(read_only=True)
     street = serializers.CharField()
@@ -49,9 +45,16 @@ class ProfessionalSerializer(serializers.Serializer):
     user = UserSerializer(read_only=True)
     council_number = serializers.CharField()
     specialty = serializers.CharField()
-    address = AddressSerializer(many=True, read_only=True)
+    address = AddressSerializer(many=True, read_only=True) 
     name = serializers.CharField()
-    phone = serializers.CharField()
+    phone = serializers.CharField()  
+
+
+class NewPatientSerializer(serializers.Serializer):
+    user = UserSerializer(read_only=True)
+    cpf = serializers.CharField()
+    age = serializers.CharField()
+    sex = serializers.CharField()
 
 
 class PatientSerializer(serializers.ModelSerializer):
@@ -66,7 +69,6 @@ class PatientSerializer(serializers.ModelSerializer):
         }
 
     def validate(self, attrs):
-
         email = attrs['user']['email']
 
         does_user_already_exists = User.objects.filter(email=email).exists()
@@ -87,13 +89,14 @@ class PatientSerializer(serializers.ModelSerializer):
 
         return new_patient
 
-    def update(self, validated_data):
-        #   ESTÁ CONFUNDINDO COM O CREATE. NÃO PASSA DO VALIDATE
-        # ipdb.set_trace()
-        user_to_update = User.objects.update(**validated_data)
-        user_updated = Patient.objects.get(user_to_update)
 
-        return user_updated
+class PatientIdSerializer(serializers.ModelSerializer):
+    user = UserForPatientSerializer()
+
+    class Meta:
+        model = Patient
+        fields = "__all__"
+
 
 class AdminSerializer(serializers.Serializer):
     user = UserSerializer(read_only=True)
