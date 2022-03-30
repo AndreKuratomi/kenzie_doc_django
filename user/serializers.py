@@ -49,18 +49,12 @@ class ProfessionalSerializer(serializers.Serializer):
     name = serializers.CharField()
     phone = serializers.CharField()  
 
-# class AppProfessionalSerializer(serializers.Serializer): 
-# 	"patient_id": {
-# 		"cpf": "11111111111"
-# 	},
-# 	"professional_id": {
-# 		"council_number": "30000-sp"
-# 	},
-# 	"date": "2022-12-16T13:41:02Z",
-# 	"finished": false,
-# 	"complaint": "Enxaqueca"
-# }
 
+class NewPatientSerializer(serializers.Serializer):
+    user = UserSerializer(read_only=True)
+    cpf = serializers.CharField()
+    age = serializers.CharField()
+    sex = serializers.CharField()
 
 
 class PatientSerializer(serializers.ModelSerializer):
@@ -75,7 +69,6 @@ class PatientSerializer(serializers.ModelSerializer):
         }
 
     def validate(self, attrs):
-        # if self.request.method != "PATCH":
         email = attrs['user']['email']
 
         does_user_already_exists = User.objects.filter(email=email).exists()
@@ -103,20 +96,6 @@ class PatientIdSerializer(serializers.ModelSerializer):
     class Meta:
         model = Patient
         fields = "__all__"
-
-    # def update(self, validated_data):
-    #     # ipdb.set_trace()
-    #     user_to_update = User.objects.update(email=validated_data['user']['email'], password=validated_data['user']['password'])
-    #     user_updated = Patient.objects.get(user_to_update)
-
-    #     return user_updated
-
-
-# class PatientToUpdateSerializer(serializers.Serializer):
-#     user = UserSerializer(read_only=True)
-#     cpf = serializers.CharField(required=False)
-#     age = serializers.CharField(required=False)
-#     sex = serializers.CharField(required=False)
 
 
 class AdminSerializer(serializers.Serializer):

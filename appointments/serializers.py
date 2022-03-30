@@ -14,8 +14,8 @@ class AppointmentsSerializer(serializers.Serializer):
     date = serializers.DateTimeField()
     complaint = serializers.CharField()
     finished = serializers.BooleanField()
-    patient = AppPatientSerializer()
-    professional = AppProfessonalSerializer()
+    patient = serializers.CharField()
+    professional = serializers.CharField()
 
 class AllAppointmentsSerializer(serializers.Serializer):
     uuid = serializers.UUIDField(read_only=True)
