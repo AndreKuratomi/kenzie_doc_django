@@ -4,13 +4,13 @@ from django.db import IntegrityError
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView#, RetrieveUpdateAPIView, DestroyAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authentication import authenticate
 
 from .models import Patient, Professional, User, Admin
-from .serializers import AdminSerializer, LoginUserSerializer, PatientIdSerializer, PatientSerializer, ProfessionalSerializer
+from .serializers import AdminSerializer, LoginUserSerializer, PatientIdSerializer, PatientSerializer, ProfessionalSerializer#, PatientToDeleteSerializer
 from .permissions import IsAdmin, ProfessionalsPermissions
 
 # import ipdb
@@ -47,6 +47,17 @@ class PatientByIdView(RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAdmin]
 
     lookup_url_kwarg = "patient_id"
+
+
+# class PatientToDestroyByIdView(DestroyAPIView):
+
+#     queryset = Patient.objects.all()
+#     serializer_class = PatientToDeleteSerializer
+
+#     authentication_classes = [TokenAuthentication]
+#     permission_classes = [IsAdmin]
+
+#     lookup_url_kwarg = "patient_id"
 
 
 class ProfessionalsView(APIView):

@@ -14,6 +14,8 @@ from .permissions import AppointmentPermission
 from user.models import Patient, Professional
 from user.serializers import PatientSerializer
 
+import ipdb
+
 
 class SpecificPatientView(APIView):
 
@@ -90,32 +92,34 @@ class CreateAppointment(APIView):
     def post(self, request):
         try:
 
-            professional = Professional.objects.get(council_number=request.data['professional'])
-            print(professional.user.email)
-            patient = Patient.objects.get(cpf=request.data['patient'])
+            professional = Professional.objects.get(council_number=request.data['professional']['council_number'])
+            patient = Patient.objects.get(cpf=request.data['patient']['cpf'])
 
-            date = datetime.strptime(request["date"], "%Y-%m-%dT%H:%M:%SZ")
-
+            date = datetime.strptime(request.data["date"], "%Y-%m-%dT%H:%M:%SZ")
+            print(date)
+            # ipdb.set_trace()
             serializer = AppointmentsSerializer(
-                data=request.data, professional=professional, patient=patient, date=date
+                data=request.data, 
+                # professional=professional, patient=patient, date=date
             )
-
+            print(serializer)
             if not serializer.is_valid():
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-            appointment = AppointmentsModel.objects.create(**serializer.validated_data)
+            appointment = AppointmentsModel.objects.save()
+            # create(**serializer.validated_data)
             serializer = AppointmentsSerializer(appointment)
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        # except Professional.ObjectDoesNotExist:
-        except ObjectDoesNotExist:
+        # except ObjectDoesNotExist:
+        except Professional.DoesNotExist:
             return Response(
                 {"message": "Professional not registered"},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        # except Patient.ObjectDoesNotExist:
-        #     return Response(
-        #         {"message": "Patient not registered"}, status=status.HTTP_404_NOT_FOUND
-        #     )
+        except Patient.DoesNotExist:
+            return Response(
+                {"message": "Patient not registered"}, status=status.HTTP_404_NOT_FOUND
+            )

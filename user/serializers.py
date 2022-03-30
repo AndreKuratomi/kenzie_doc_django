@@ -60,7 +60,6 @@ class PatientSerializer(serializers.ModelSerializer):
         }
 
     def validate(self, attrs):
-        # if self.request.method != "PATCH":
         email = attrs['user']['email']
 
         does_user_already_exists = User.objects.filter(email=email).exists()
@@ -90,23 +89,30 @@ class PatientIdSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def update(self, instance, validated_data):
-        # ipdb.set_trace()
         user_data = validated_data.pop('user')
         user = User.objects.filter(uuid=instance.user.uuid).update(**user_data)
         patient = Patient.objects.filter(cpf=instance.cpf).update(**validated_data)
 
         updated_patient = Patient.objects.get(cpf=instance.cpf)
-        # user = validated_data.get('user', instance.user)
-        # instance.user.email = user['email']
-        # instance.user.password = validated_data.get('password', instance.user.password)
-        # instance.age = validated_data.get('age', instance.age)
 
         return updated_patient
 
-    # def delete(self, instance, validated_data):
-    #     user_data = validated_data.pop('user')
-    #     user = User.objects.filter(uuid=instance.user.uuid).delete(**user_data)
-    #     patient = Patient.objects.filter(cpf=instance.cpf).delete(**validated_data)
+    # def delete(self, request):
+    #     ipdb.set_trace()
+    #     user = User.objects.filter(uuid=user.uuid)
+    #     user.delete()
+
+    #     patient = Patient.objects.filter(cpf=cpf)
+    #     patient.delete()
+
+# class PatientToDeleteSerializer(serializers.ModelSerializer):
+#     def delete(self, request):
+#         ipdb.set_trace()
+#         user = User.objects.filter(uuid=user.uuid)
+#         user.delete()
+
+#         patient = Patient.objects.filter(cpf=cpf)
+#         patient.delete()
 
 
 class AdminSerializer(serializers.Serializer):
