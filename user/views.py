@@ -88,13 +88,7 @@ class ProfessionalsView(APIView):
                 phone=request.data['phone'],
                 specialty=request.data['specialty']
                 )
-
-            # whats_msg = "Professional criado com sucesso"
-
-            # time_to_send = datetime.now() + timedelta(minutes=1)
-
-            # pywhatkit.sendwhatmsg("+5519997416761", whats_msg, time_to_send.hour,time_to_send.minute)
-
+          
             serializer = ProfessionalSerializer(professional)
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -194,7 +188,6 @@ class ProfessionalsByIdView(APIView):
                         status=status.HTTP_401_UNAUTHORIZED
                     )
                 
-            # professional.delete()
             user.delete()
 
             return Response(status=status.HTTP_204_NO_CONTENT)
@@ -215,8 +208,6 @@ class AdminView(APIView):
             user = User.objects.create_user(data['email'], data['password'], is_admin=True)
 
             admin = Admin.objects.create(user=user, name=request.data['name'])
-
-            # fazer try/except KeyError
 
             serializer = AdminSerializer(admin)
 

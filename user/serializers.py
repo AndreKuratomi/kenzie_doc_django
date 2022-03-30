@@ -49,18 +49,12 @@ class ProfessionalSerializer(serializers.Serializer):
     name = serializers.CharField()
     phone = serializers.CharField()  
 
-# class AppProfessionalSerializer(serializers.Serializer): 
-# 	"patient_id": {
-# 		"cpf": "11111111111"
-# 	},
-# 	"professional_id": {
-# 		"council_number": "30000-sp"
-# 	},
-# 	"date": "2022-12-16T13:41:02Z",
-# 	"finished": false,
-# 	"complaint": "Enxaqueca"
-# }
 
+class NewPatientSerializer(serializers.Serializer):
+    user = UserSerializer(read_only=True)
+    cpf = serializers.CharField()
+    age = serializers.CharField()
+    sex = serializers.CharField()
 
 
 class PatientSerializer(serializers.ModelSerializer):
