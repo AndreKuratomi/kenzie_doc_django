@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate
 from django.db import IntegrityError
+from datetime import date, datetime, time, timedelta
 
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
@@ -14,6 +15,9 @@ from .serializers import AdminSerializer, LoginUserSerializer, PatientIdSerializ
 from .permissions import IsAdmin, ProfessionalsPermissions
 
 # import ipdb
+# import pywhatkit
+
+
 class LoginUserView(APIView):
     def post(self, request):
         serializer = LoginUserSerializer(data=request.data)
@@ -73,6 +77,12 @@ class ProfessionalsView(APIView):
                 phone=request.data['phone'],
                 specialty=request.data['specialty']
                 )
+
+            # whats_msg = "Professional criado com sucesso"
+
+            # time_to_send = datetime.now() + timedelta(minutes=1)
+
+            # pywhatkit.sendwhatmsg("+5519997416761", whats_msg, time_to_send.hour,time_to_send.minute)
 
             serializer = ProfessionalSerializer(professional)
 
@@ -173,7 +183,8 @@ class ProfessionalsByIdView(APIView):
                         status=status.HTTP_401_UNAUTHORIZED
                     )
                 
-            professional.delete()
+            # professional.delete()
+            user.delete()
 
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Professional.DoesNotExist:

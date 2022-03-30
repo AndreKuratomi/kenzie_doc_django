@@ -5,7 +5,7 @@ from kenziedoc.exceptions import PatientAlreadyExistsError, UserAlreadyExistsErr
 from user.models import Patient, User
 from .services import is_valid_uuid
 
-import ipdb
+# import ipdb
 
 
 class UserSerializer(serializers.Serializer):
@@ -13,6 +13,8 @@ class UserSerializer(serializers.Serializer):
     is_prof = serializers.BooleanField(write_only=True)
     is_admin = serializers.BooleanField(write_only=True)
     email = serializers.EmailField()
+    # name = serializers.CharField()
+    # phone = serializers.CharField()
 
 
 class UserForPatientSerializer(serializers.ModelSerializer):
@@ -43,9 +45,22 @@ class ProfessionalSerializer(serializers.Serializer):
     user = UserSerializer(read_only=True)
     council_number = serializers.CharField()
     specialty = serializers.CharField()
-    address = AddressSerializer(many=True, read_only=True)
+    address = AddressSerializer(many=True, read_only=True) 
     name = serializers.CharField()
-    phone = serializers.CharField()
+    phone = serializers.CharField()  
+
+# class AppProfessionalSerializer(serializers.Serializer): 
+# 	"patient_id": {
+# 		"cpf": "11111111111"
+# 	},
+# 	"professional_id": {
+# 		"council_number": "30000-sp"
+# 	},
+# 	"date": "2022-12-16T13:41:02Z",
+# 	"finished": false,
+# 	"complaint": "Enxaqueca"
+# }
+
 
 
 class PatientSerializer(serializers.ModelSerializer):
