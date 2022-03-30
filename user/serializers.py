@@ -5,7 +5,7 @@ from kenziedoc.exceptions import PatientAlreadyExistsError, UserAlreadyExistsErr
 from user.models import Patient, User
 from .services import is_valid_uuid
 
-# import ipdb
+import ipdb
 
 
 class UserSerializer(serializers.Serializer):
@@ -105,23 +105,6 @@ class PatientIdSerializer(serializers.ModelSerializer):
         updated_patient = Patient.objects.get(cpf=instance.cpf)
 
         return updated_patient
-
-    # def delete(self, request):
-    #     ipdb.set_trace()
-    #     user = User.objects.filter(uuid=user.uuid)
-    #     user.delete()
-
-    #     patient = Patient.objects.filter(cpf=cpf)
-    #     patient.delete()
-
-# class PatientToDeleteSerializer(serializers.ModelSerializer):
-#     def delete(self, request):
-#         ipdb.set_trace()
-#         user = User.objects.filter(uuid=user.uuid)
-#         user.delete()
-
-#         patient = Patient.objects.filter(cpf=cpf)
-#         patient.delete()
 
 
 class AdminSerializer(serializers.Serializer):

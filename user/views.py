@@ -5,16 +5,16 @@ from datetime import date, datetime, time, timedelta
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView#, RetrieveUpdateAPIView, DestroyAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authentication import authenticate
 
 from .models import Patient, Professional, User, Admin
-from .serializers import AdminSerializer, LoginUserSerializer, PatientIdSerializer, PatientSerializer, ProfessionalSerializer#, PatientToDeleteSerializer
+from .serializers import AdminSerializer, LoginUserSerializer, PatientIdSerializer, PatientSerializer, ProfessionalSerializer
 from .permissions import IsAdmin, ProfessionalsPermissions
 
-# import ipdb
+import ipdb
 # import pywhatkit
 
 
@@ -52,16 +52,14 @@ class PatientByIdView(RetrieveUpdateDestroyAPIView):
 
     lookup_url_kwarg = "patient_id"
 
+    def delete(self, request, patient_id=''):
+        patient = Patient.objects.filter(cpf=patient_id)
+        user = User.objects.get(patient__in=patient)
 
-# class PatientToDestroyByIdView(DestroyAPIView):
+        patient.delete()
+        user.delete()
 
-#     queryset = Patient.objects.all()
-#     serializer_class = PatientToDeleteSerializer
-
-#     authentication_classes = [TokenAuthentication]
-#     permission_classes = [IsAdmin]
-
-#     lookup_url_kwarg = "patient_id"
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class ProfessionalsView(APIView):

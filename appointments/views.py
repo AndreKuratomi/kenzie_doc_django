@@ -124,7 +124,7 @@ class CreateAppointment(APIView):
         #         status=status.HTTP_404_NOT_FOUND,
         #     )
 
-        except Patient.DoesNotExist:
-            return Response(
-                {"message": "Patient not registered"}, status=status.HTTP_404_NOT_FOUND
-            )
+        # except Patient.DoesNotExist:
+        #     return Response(
+        #         {"message": "Patient not registered"}, status=status.HTTP_404_NOT_FOUND
+        #     )
