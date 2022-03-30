@@ -9,10 +9,10 @@ from rest_framework.authentication import TokenAuthentication
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.decorators import authentication_classes, permission_classes
 from .models import AppointmentsModel
-from .serializers import AppointmentsSerializer
+from .serializers import AllAppointmentsSerializer, AppPatientSerializer, AppProfessonalSerializer, AppointmentsSerializer
 from .permissions import AppointmentPermission
-from user.models import Patient, Professional
-from user.serializers import PatientSerializer
+from user.models import Patient, Professional, User
+from user.serializers import PatientSerializer, ProfessionalSerializer
 
 
 class SpecificPatientView(APIView):
@@ -93,34 +93,51 @@ class CreateAppointment(APIView):
         # try:
 
         professional = Professional.objects.get(council_number=request.data['professional']['council_number'])
+        user_prof = User.objects.get(professional=professional)
         print("======professional")
         print(professional)
 
         # patient = Patient.objects.get(cpf=request.patient)
-        patient = Patient.objects.get(cpf=request.data['patient']['cpf'])
+        patient = Patient.objects.get(cpf=request.data['patient']['cpf']) 
+        user_pat = User.objects.get(patient=patient) 
+
         print("======patient")
         print(patient)
 
         date = datetime.strptime(request.data["date"], "%Y-%m-%dT%H:%M:%SZ")
+        data=request.data
 
-        serializer = AppointmentsSerializer(
-            # data=request.data, 
-            professional=request.data['professional']['council_number'], 
-            patient=request.data['patient']['cpf'], 
-            date=request.data['date'],
-            complaint=request.data['complaint'],
-            finished=request.data['finished']
+        # prof = AppProfessonalSerializer(professional)
+        # pat = AppPatientSerializer(patient)
+
+        data['professional'] = professional.council_number
+        data['patient'] = patient.cpf
+        print(data)
+        print(user_prof)
+        print(user_pat)
+
+        
+
+        serializer = AllAppointmentsSerializer(
+            data=data
+            # professional=professional, 
+            # patient=patient, 
+            # date=request.data['date'],
+            # complaint=request.data['complaint'],
+            # finished=request.data['finished']
         )
+
 
         print("======serializer valid?")
         print(serializer.is_valid())
         print("======após serializer 1")
         # serializer = AppointmentsSerializer(data=request.data)
         
-
+        print(serializer.validated_data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+        # appointment = AppointmentsModel.objects.create(**serializer.validated_data)
         appointment = AppointmentsModel.objects.create(**serializer.validated_data)
         serializer = AppointmentsSerializer(appointment)
 

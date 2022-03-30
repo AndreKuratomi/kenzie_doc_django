@@ -183,7 +183,8 @@ class ProfessionalsByIdView(APIView):
                         status=status.HTTP_401_UNAUTHORIZED
                     )
                 
-            professional.delete()
+            # professional.delete()
+            user.delete()
 
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Professional.DoesNotExist:
