@@ -98,7 +98,8 @@ class CreateAppointment(APIView):
         data=request.data
 
         prof = ProfessionalSerializer(professional)
-        pat = NewPatientSerializer(patient)
+        # pat = NewPatientSerializer(patient)
+        pat = PatientSerializer(patient)
 
         data['professional'] = prof.data["council_number"]
         data['patient'] = pat.data["cpf"]
@@ -107,7 +108,7 @@ class CreateAppointment(APIView):
             data=data
         )
         
-        print(serializer.validated_data)
+        # print(serializer.validated_data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
