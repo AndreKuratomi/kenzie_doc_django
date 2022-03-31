@@ -4,7 +4,7 @@ from django.db import IntegrityError
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authentication import authenticate
@@ -14,8 +14,6 @@ from .serializers import AdminSerializer, LoginUserSerializer, PatientIdSerializ
 from .permissions import IsAdmin, ProfessionalsPermissions
 
 # import ipdb
-
-
 class LoginUserView(APIView):
     def post(self, request):
         serializer = LoginUserSerializer(data=request.data)
@@ -31,14 +29,13 @@ class LoginUserView(APIView):
         else:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
 
+# class PatientsView(ListCreateAPIView):
 
-class PatientsView(ListCreateAPIView):
+#     queryset = Patient.objects.all()
+#     serializer_class = PatientSerializer
 
-    queryset = Patient.objects.all()
-    serializer_class = PatientSerializer
-
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAdmin]
+#     authentication_classes = [TokenAuthentication]
+#     permission_classes = [IsAdmin]
 
 
 class PatientByIdView(RetrieveUpdateDestroyAPIView):
@@ -50,6 +47,46 @@ class PatientByIdView(RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAdmin]
 
     lookup_url_kwarg = "patient_id"
+
+class PatientView(APIView):
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAdmin]
+
+    def post(self, request):
+        try:
+            serializer = PatientSerializer(data=request.data)
+            data = request.data
+
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+            if Patient.objects.filter(cpf=serializer.validated_data['cpf']).exists() == True:
+                return Response({"message": "This patient already exists"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+            user = User.objects.create_user(data['email'], data['password'])
+            patient = Patient.objects.create(
+                user=user, 
+                name=request.data['name'],
+                cpf=request.data['cpf'],
+                phone=request.data['phone'],
+                age = request.data['age'],
+                sex = request.data['sex']
+                )
+
+            serializer = PatientSerializer(patient)
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except IntegrityError:
+            return Response({"message": "This patient already exists"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+    def get(self, request):
+
+        patients = Professional.objects.all()
+
+        serialized = PatientSerializer(patients, many=True)
+
+        return Response(serialized.data, status=status.HTTP_200_OK)
 
 
 class ProfessionalsView(APIView):

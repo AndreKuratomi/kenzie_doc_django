@@ -8,6 +8,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.decorators import authentication_classes, permission_classes
+
+from user.views import ProfessionalsByIdView
 from .models import AppointmentsModel
 from .serializers import AppointmentsSerializer
 from .permissions import AppointmentPermission
@@ -38,14 +40,14 @@ class SpecificPatientView(APIView):
 
 
 class SpecificProfessionalView(APIView):
-
+    print('***')
     authentication_classes = [TokenAuthentication]
     permission_classes = [AppointmentPermission]
 
     def get(self, request, council_number):
         try:
             professional = Professional.objects.get(council_number=council_number)
-
+            print("-"*100)
             appointment = AppointmentsModel.objects.filter(professional=professional)
 
             for appointments in appointment:
@@ -88,17 +90,25 @@ class CreateAppointment(APIView):
     permission_classes = [AppointmentPermission]
 
     def post(self, request):
-        print("+++")
-        print(request.data['patient']['cpf'])
         try:
 
-            professional = Professional.objects.get(council_number=request.data['professional'])
-            patient =  Patient.objects.get(cpf='')
-            print(patient, '+'*100)
-            # date = datetime.strptime(request.data["date"], "%Y-%m-%dT%H:%M:%SZ")
+            professional = Professional.objects.get(council_number=request.data['professional_id'])
+            print(professional.user, '******AS')
+            patient = Patient.objects.get(cpf=request.data['patient_id'])
+            print(patient.user, "******")
+            # date = datetime.strptime(request["date"], "%Y-%m-%dT%H:%M:%SZ")
 
+            new_data = {
+                "professional": professional,
+                "patient": patient,
+                "date": request.data['date'],
+                "complaint": request.data['complaint'],
+                "finished": request.data['finished']
+            }
+        
             serializer = AppointmentsSerializer(
-                data=request.data,
+                data=new_data,
+              
             )
 
             if not serializer.is_valid():
@@ -110,12 +120,13 @@ class CreateAppointment(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         # except Professional.ObjectDoesNotExist:
-        #     return Response(
-        #         {"message": "Professional not registered"},
-        #         status=status.HTTP_404_NOT_FOUND,
-        #     )
-
         except ObjectDoesNotExist:
             return Response(
-                {"message": "Patient not registered"}, status=status.HTTP_404_NOT_FOUND
+                {"message": "Professional not registered"},
+                status=status.HTTP_404_NOT_FOUND,
             )
+
+        # except Patient.ObjectDoesNotExist:
+        #     return Response(
+        #         {"message": "Patient not registered"}, status=status.HTTP_404_NOT_FOUND
+        #     )

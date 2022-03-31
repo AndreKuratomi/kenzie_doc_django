@@ -43,43 +43,53 @@ class ProfessionalSerializer(serializers.Serializer):
     user = UserSerializer(read_only=True)
     council_number = serializers.CharField()
     specialty = serializers.CharField()
-    address = AddressSerializer(many=True, read_only=True)
+    # address = AddressSerializer(many=True, read_only=True)
     name = serializers.CharField()
     phone = serializers.CharField()
 
 
-class PatientSerializer(serializers.ModelSerializer):
-    user = UserForPatientSerializer()
+class PatientSerializer(serializers.Serializer):
+    user = UserSerializer(read_only=True)
+    cpf = serializers.CharField()
+    age = serializers.CharField()
+    sex = serializers.CharField()
+    name = serializers.CharField()
+    phone = serializers.CharField()
 
-    class Meta:
-        model = Patient
-        fields = "__all__"
 
-        extra_kwargs = {
-            'cpf': {'read_only': False}
-        }
 
-    def validate(self, attrs):
-        # if self.request.method != "PATCH":
-        email = attrs['user']['email']
+# class PatientSerializer(serializers.ModelSerializer):
+#     user = UserForPatientSerializer()
 
-        does_user_already_exists = User.objects.filter(email=email).exists()
-        if does_user_already_exists is True:
-            raise UserAlreadyExistsError()
+#     class Meta:
+#         model = Patient
+#         fields = "__all__"
 
-        cpf = attrs['cpf']
+#         extra_kwargs = {
+#             'cpf': {'read_only': False}
+#         }
 
-        does_patient_already_exists = Patient.objects.filter(cpf=cpf).exists()
-        if does_patient_already_exists is True:
-            raise PatientAlreadyExistsError()
+#     def validate(self, attrs):
+#         # if self.request.method != "PATCH":
+#         email = attrs['user']['email']
 
-        return super().validate(attrs)
+#         does_user_already_exists = User.objects.filter(email=email).exists()
+#         if does_user_already_exists is True:
+#             raise UserAlreadyExistsError()
 
-    def create(self, validated_data):
-        user = User.objects.create_user(email=validated_data['user']['email'], password=validated_data['user']['password'])
-        new_patient = Patient.objects.create(user=user, cpf=validated_data['cpf'], age=validated_data['age'], sex=validated_data['sex'])
+#         cpf = attrs['cpf']
 
-        return new_patient
+#         does_patient_already_exists = Patient.objects.filter(cpf=cpf).exists()
+#         if does_patient_already_exists is True:
+#             raise PatientAlreadyExistsError()
+
+#         return super().validate(attrs)
+
+#     def create(self, validated_data):
+#         user = User.objects.create_user(email=validated_data['user']['email'], password=validated_data['user']['password'])
+#         new_patient = Patient.objects.create(user=user, cpf=validated_data['cpf'], age=validated_data['age'], sex=validated_data['sex'])
+
+#         return new_patient
 
 
 class PatientIdSerializer(serializers.ModelSerializer):
