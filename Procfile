@@ -1,1 +1,1 @@
-gunicorn project_name.wsgi
+web: gunicorn kenziedoc.wsgi
