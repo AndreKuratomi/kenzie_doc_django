@@ -9,6 +9,8 @@ https://docs.djangoproject.com/en/4.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
+import os
+import dj_database_url
 
 from pathlib import Path
 
@@ -25,7 +27,7 @@ SECRET_KEY = "django-insecure-6s@z@@40(&j)964(!i5e6d9+8uomonh6@0r9*^1j4b0ti&m!1f
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = ['django-app-api.herokuapp.com', 'localhost']
 
 
 # Application definition
@@ -83,6 +85,13 @@ DATABASES = {
         "NAME": BASE_DIR / "db.sqlite3",
     }
 }
+
+DATABASE_URL = os.environ.get("DATABASE_URL")
+if DATABASE_URL:
+    db_from_env = dj_database_url.config(
+        default=DATABASE_URL, conn_max_age=500, ssl_require=True)
+    DATABASES['default'].update(db_from_env)
+    DEBUG = False
 
 
 # Password validation

@@ -5,7 +5,6 @@ from kenziedoc.exceptions import PatientAlreadyExistsError, UserAlreadyExistsErr
 from user.models import Patient, User
 from .services import is_valid_uuid
 
-# import ipdb
 
 
 class UserSerializer(serializers.Serializer):
@@ -13,8 +12,6 @@ class UserSerializer(serializers.Serializer):
     is_prof = serializers.BooleanField(write_only=True)
     is_admin = serializers.BooleanField(write_only=True)
     email = serializers.EmailField()
-    # name = serializers.CharField()
-    # phone = serializers.CharField()
 
 
 class UserForPatientSerializer(serializers.ModelSerializer):
@@ -45,7 +42,6 @@ class ProfessionalSerializer(serializers.Serializer):
     user = UserSerializer(read_only=True)
     council_number = serializers.CharField()
     specialty = serializers.CharField()
-    address = AddressSerializer(many=True, read_only=True) 
     name = serializers.CharField()
     phone = serializers.CharField()  
 
@@ -90,12 +86,23 @@ class PatientSerializer(serializers.ModelSerializer):
         return new_patient
 
 
+
 class PatientIdSerializer(serializers.ModelSerializer):
     user = UserForPatientSerializer()
 
     class Meta:
         model = Patient
         fields = "__all__"
+
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop('user')
+        user = User.objects.filter(uuid=instance.user.uuid).update(**user_data)
+        patient = Patient.objects.filter(cpf=instance.cpf).update(**validated_data)
+
+        updated_patient = Patient.objects.get(cpf=instance.cpf)
+
+        return updated_patient
+
 
 
 class AdminSerializer(serializers.Serializer):

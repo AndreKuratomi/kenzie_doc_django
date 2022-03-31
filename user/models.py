@@ -38,11 +38,9 @@ class User(AbstractUser):
 
     objects = UsersModel()
 
-
 class UserLogin(models.Model):
     email = models.EmailField(max_length=255, unique=True)
     password = models.CharField(max_length=255, unique=False)
-
 
 class Address(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -50,11 +48,16 @@ class Address(models.Model):
     house_number = models.IntegerField()
     state = models.CharField(max_length=255)
 
+
 class Patient(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     cpf = models.CharField(primary_key=True, max_length=11, editable=False)
+    name = models.CharField(max_length=255)
     age = models.CharField(max_length=255)
     sex = models.CharField(max_length=255)
+    phone = models.CharField(max_length=255)
+
+
 
 class Professional(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -63,6 +66,7 @@ class Professional(models.Model):
     phone = models.CharField(max_length=255)
     specialty = models.CharField(max_length=255)
     patients = models.ManyToManyField(Patient)
+
 
 class Admin(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
