@@ -5,7 +5,6 @@ from .views import AdminView, LoginUserView, PatientsView, PatientByIdView, Prof
 urlpatterns = [
     # path('user/'),
     path('login/', LoginUserView.as_view()),
-    # path('address/'),
     path('admin/', AdminView.as_view()),
     path('patient/', PatientsView.as_view()),
     path('patient/<str:patient_id>/', PatientByIdView.as_view()),
