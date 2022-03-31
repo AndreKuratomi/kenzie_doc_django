@@ -11,10 +11,10 @@ from rest_framework.decorators import authentication_classes, permission_classes
 
 from user.views import ProfessionalsByIdView
 from .models import AppointmentsModel
-from .serializers import AppointmentsSerializer
+from .serializers import AllAppointmentsSerializer, AppPatientSerializer, AppProfessonalSerializer, AppointmentsSerializer
 from .permissions import AppointmentPermission
 from user.models import Patient, Professional, User
-from user.serializers import PatientSerializer
+from user.serializers import PatientSerializer, ProfessionalSerializer, NewPatientSerializer
 
 
 class SpecificPatientView(APIView):
@@ -90,43 +90,30 @@ class CreateAppointment(APIView):
     permission_classes = [AppointmentPermission]
 
     def post(self, request):
-        try:
 
-            professional = Professional.objects.get(council_number=request.data['professional_id'])
-            print(professional.user, '******AS')
-            patient = Patient.objects.get(cpf=request.data['patient_id'])
-            print(patient.user, "******")
-            # date = datetime.strptime(request["date"], "%Y-%m-%dT%H:%M:%SZ")
-
-            new_data = {
-                "professional": professional,
-                "patient": patient,
-                "date": request.data['date'],
-                "complaint": request.data['complaint'],
-                "finished": request.data['finished']
-            }
+        professional = Professional.objects.get(council_number=request.data['council_number'])
         
-            serializer = AppointmentsSerializer(
-                data=new_data,
-              
-            )
+        patient = Patient.objects.get(cpf=request.data['cpf']) 
 
-            if not serializer.is_valid():
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        data=request.data
 
-            appointment = AppointmentsModel.objects.create(**serializer.validated_data)
-            serializer = AppointmentsSerializer(appointment)
+        prof = ProfessionalSerializer(professional)
+        pat = NewPatientSerializer(patient)
 
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        data['professional'] = prof.data["council_number"]
+        data['patient'] = pat.data["cpf"]
 
-        # except Professional.ObjectDoesNotExist:
-        except ObjectDoesNotExist:
-            return Response(
-                {"message": "Professional not registered"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+        serializer = AppointmentsSerializer(
+            data=data
+        )
+        
+        print(serializer.validated_data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        # except Patient.ObjectDoesNotExist:
-        #     return Response(
-        #         {"message": "Patient not registered"}, status=status.HTTP_404_NOT_FOUND
-        #     )
+        serializer.validated_data['professional'] = professional
+        serializer.validated_data['patient'] = patient
+        appointment = AppointmentsModel.objects.create(**serializer.validated_data)
+        serializer = AppointmentsSerializer(appointment)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
