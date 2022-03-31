@@ -85,7 +85,7 @@ class PatientSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = User.objects.create_user(email=validated_data['user']['email'], password=validated_data['user']['password'])
-        new_patient = Patient.objects.create(user=user, cpf=validated_data['cpf'], age=validated_data['age'], sex=validated_data['sex'])
+        new_patient = Patient.objects.create(user=user, cpf=validated_data['cpf'], age=validated_data['age'], sex=validated_data['sex'], first_name=validated_data['first_name'], last_name=validated_data['last_name'], phone=validated_data['phone'])
 
         return new_patient
 
