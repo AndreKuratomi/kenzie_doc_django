@@ -53,17 +53,38 @@ class NewPatientSerializer(serializers.Serializer):
     sex = serializers.CharField()
 
 
-class PatientSerializer(serializers.Serializer):
-    user = UserSerializer(read_only=True)
-    cpf = serializers.CharField()
-    age = serializers.CharField()
-    sex = serializers.CharField()
-    name = serializers.CharField()
-    phone = serializers.CharField()
+class PatientSerializer(serializers.ModelSerializer):
+    user = UserForPatientSerializer()
 
+    class Meta:
+        model = Patient
+        fields = "__all__"
+
+        extra_kwargs = {
+            'cpf': {'read_only': False}
+        }
 
     def validate(self, attrs):
         email = attrs['user']['email']
+
+        does_user_already_exists = User.objects.filter(email=email).exists()
+        if does_user_already_exists is True:
+            raise UserAlreadyExistsError()
+
+        cpf = attrs['cpf']
+
+        does_patient_already_exists = Patient.objects.filter(cpf=cpf).exists()
+        if does_patient_already_exists is True:
+            raise PatientAlreadyExistsError()
+
+        return super().validate(attrs)
+
+    def create(self, validated_data):
+        user = User.objects.create_user(email=validated_data['user']['email'], password=validated_data['user']['password'])
+        new_patient = Patient.objects.create(user=user, cpf=validated_data['cpf'], age=validated_data['age'], sex=validated_data['sex'])
+
+        return new_patient
+
 
 
 class PatientIdSerializer(serializers.ModelSerializer):
@@ -72,6 +93,15 @@ class PatientIdSerializer(serializers.ModelSerializer):
     class Meta:
         model = Patient
         fields = "__all__"
+
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop('user')
+        user = User.objects.filter(uuid=instance.user.uuid).update(**user_data)
+        patient = Patient.objects.filter(cpf=instance.cpf).update(**validated_data)
+
+        updated_patient = Patient.objects.get(cpf=instance.cpf)
+
+        return updated_patient
 
 
 

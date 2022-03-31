@@ -52,10 +52,12 @@ class Address(models.Model):
 class Patient(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     cpf = models.CharField(primary_key=True, max_length=11, editable=False)
+    name = models.CharField(max_length=255)
     age = models.CharField(max_length=255)
     sex = models.CharField(max_length=255)
-    name = models.CharField(max_length=255)
     phone = models.CharField(max_length=255)
+
+
 
 class Professional(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -64,6 +66,7 @@ class Professional(models.Model):
     phone = models.CharField(max_length=255)
     specialty = models.CharField(max_length=255)
     patients = models.ManyToManyField(Patient)
+
 
 class Admin(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

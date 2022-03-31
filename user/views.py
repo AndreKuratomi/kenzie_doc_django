@@ -5,7 +5,7 @@ from datetime import date, datetime, time, timedelta
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
-from rest_framework.generics import RetrieveUpdateDestroyAPIView
+from rest_framework.generics import RetrieveUpdateDestroyAPIView, ListCreateAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authentication import authenticate
@@ -14,8 +14,7 @@ from .models import Patient, Professional, User, Admin
 from .serializers import AdminSerializer, LoginUserSerializer, PatientIdSerializer, PatientSerializer, ProfessionalSerializer
 from .permissions import IsAdmin, ProfessionalsPermissions
 
-# import ipdb
-# import pywhatkit
+import ipdb
 
 
 class LoginUserView(APIView):
@@ -33,13 +32,13 @@ class LoginUserView(APIView):
         else:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
 
-# class PatientsView(ListCreateAPIView):
+class PatientsView(ListCreateAPIView):
 
-#     queryset = Patient.objects.all()
-#     serializer_class = PatientSerializer
+    queryset = Patient.objects.all()
+    serializer_class = PatientSerializer
 
-#     authentication_classes = [TokenAuthentication]
-#     permission_classes = [IsAdmin]
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAdmin]
 
 
 class PatientByIdView(RetrieveUpdateDestroyAPIView):
@@ -51,6 +50,7 @@ class PatientByIdView(RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAdmin]
 
     lookup_url_kwarg = "patient_id"
+
 
 class PatientView(APIView):
 
@@ -67,8 +67,8 @@ class PatientView(APIView):
 
             if Patient.objects.filter(cpf=serializer.validated_data['cpf']).exists() == True:
                 return Response({"message": "This patient already exists"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-
-            user = User.objects.create_user(data['email'], data['password'])
+            print(data, '*'*100)
+            user = User.objects.create_user(data['user']['email'], data['user']['password'])
             patient = Patient.objects.create(
                 user=user, 
                 name=request.data['name'],
@@ -91,6 +91,16 @@ class PatientView(APIView):
         serialized = PatientSerializer(patients, many=True)
 
         return Response(serialized.data, status=status.HTTP_200_OK)
+
+    def delete(self, request, patient_id=''):
+        patient = Patient.objects.filter(cpf=patient_id)
+        user = User.objects.get(patient__in=patient)
+
+        patient.delete()
+        user.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 
 class ProfessionalsView(APIView):

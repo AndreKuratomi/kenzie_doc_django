@@ -7,7 +7,7 @@ class AppPatientSerializer(serializers.Serializer):
 class AppProfessonalSerializer(serializers.Serializer):
     council_number = serializers.CharField()
 
-# class 
+
 
 class AppointmentsSerializer(serializers.Serializer):
     uuid = serializers.UUIDField(read_only=True)
@@ -17,6 +17,7 @@ class AppointmentsSerializer(serializers.Serializer):
     patient = serializers.CharField()
     professional = serializers.CharField()
 
+
 class AllAppointmentsSerializer(serializers.Serializer):
     uuid = serializers.UUIDField(read_only=True)
     date = serializers.DateTimeField()
@@ -25,3 +26,10 @@ class AllAppointmentsSerializer(serializers.Serializer):
     patient = PatientSerializer()
     professional = ProfessionalSerializer()
 
+
+class AppointmentsToUpdateSerializer(serializers.Serializer):
+    date = serializers.DateTimeField(required=False)
+    complaint = serializers.CharField(required=False)
+    finished = serializers.BooleanField(required=False)
+    patient = serializers.CharField()
+    professional = serializers.CharField()
