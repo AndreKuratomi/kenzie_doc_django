@@ -1,18 +1,21 @@
 from datetime import datetime
-from urllib import response
-from django.shortcuts import render
+from django.core.exceptions import ObjectDoesNotExist
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+# from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
-from django.core.exceptions import ObjectDoesNotExist
-from rest_framework.decorators import authentication_classes, permission_classes
-from .models import AppointmentsModel
-from .serializers import AllAppointmentsSerializer, AppPatientSerializer, AppProfessonalSerializer, AppointmentsSerializer
-from .permissions import AppointmentPermission
+# from rest_framework.decorators import authentication_classes, permission_classes
+
 from user.models import Patient, Professional, User
 from user.serializers import PatientSerializer, ProfessionalSerializer, NewPatientSerializer
+
+from .models import AppointmentsModel
+from .serializers import AllAppointmentsSerializer, AppPatientSerializer, AppProfessonalSerializer, AppointmentsSerializer
+from .permissions import AppointmentByIdForProfessionalPermission, AppointmentPermission
+
+import ipdb
 
 
 class SpecificPatientView(APIView):
@@ -20,19 +23,18 @@ class SpecificPatientView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [AppointmentPermission]
 
-    def get(self, request, cpf):
+    def get(self, request, cpf=''):
         try:
             patient = Patient.objects.get(cpf=cpf)
 
-            appointment = AppointmentsModel.objects.filter(patient=patient)
+            if patient:
+                appointment = AppointmentsModel.objects.filter(patient=patient)
+                serializer = AppointmentsSerializer(appointment, many=True)
 
-            for appointments in appointment:
-                serializer = AppointmentsSerializer(appointments)
+                return Response(serializer.data, status=status.HTTP_200_OK)
 
-            return response(serializer.data, status=status.HTTP_200_OK)
-
-        except ObjectDoesNotExist:
-            return response(
+        except Patient.DoesNotExist:
+            return Response(
                 {"message": "Patient does not exist"}, status=status.HTTP_404_NOT_FOUND
             )
 
@@ -42,23 +44,44 @@ class SpecificProfessionalView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [AppointmentPermission]
 
-    def get(self, request, council_number):
+    def get(self, request, council_number=''):
         try:
             professional = Professional.objects.get(council_number=council_number)
 
-            appointment = AppointmentsModel.objects.filter(professional=professional)
+            if professional:
+                appointment = AppointmentsModel.objects.filter(professional=professional)
 
-            for appointments in appointment:
-                serializer = AppointmentsSerializer(appointments)
+                serializer = AppointmentsSerializer(appointment, many=True)
 
-            return response(serializer.data, status=status.HTTP_200_OK)
+                return Response(serializer.data, status=status.HTTP_200_OK)
 
-        except ObjectDoesNotExist:
-            return response(
-                {"message": "Professional not registered"},
-                status=status.HTTP_404_NOT_FOUND,
+        except Professional.DoesNotExist:
+            return Response(
+                {"message": "Professional not registered"}, status=status.HTTP_404_NOT_FOUND,
             )
 
+
+class SpecificAppointmentView(APIView):
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [AppointmentPermission]
+
+    def get(self, request, appointment_id=''):
+        print("eita")
+        try:
+            appointment = AppointmentsModel.objects.get(uuid=appointment_id)
+            print(appointment)
+
+            if appointment:
+
+                serializer = AppointmentsSerializer(appointment)
+
+                return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except AppointmentsModel.DoesNotExist:
+            return Response(
+                {"message": "Appointment not registered"}, status=status.HTTP_404_NOT_FOUND,
+            )
 
 class NotFinishedAppointmentView(APIView):
 
@@ -90,7 +113,7 @@ class CreateAppointment(APIView):
     def post(self, request):
 
         professional = Professional.objects.get(council_number=request.data['council_number'])
-        
+
         patient = Patient.objects.get(cpf=request.data['cpf']) 
 
         data=request.data
@@ -104,8 +127,7 @@ class CreateAppointment(APIView):
         serializer = AppointmentsSerializer(
             data=data
         )
-        
-        print(serializer.validated_data)
+
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
