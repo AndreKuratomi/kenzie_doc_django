@@ -14,6 +14,8 @@ from .permissions import AppointmentPermission
 from user.models import Patient, Professional, User
 from user.serializers import PatientSerializer, ProfessionalSerializer, NewPatientSerializer
 
+import ipdb
+
 
 class SpecificPatientView(APIView):
 
@@ -96,7 +98,8 @@ class CreateAppointment(APIView):
         data=request.data
 
         prof = ProfessionalSerializer(professional)
-        pat = NewPatientSerializer(patient)
+        # pat = NewPatientSerializer(patient)
+        pat = PatientSerializer(patient)
 
         data['professional'] = prof.data["council_number"]
         data['patient'] = pat.data["cpf"]
@@ -105,7 +108,7 @@ class CreateAppointment(APIView):
             data=data
         )
         
-        print(serializer.validated_data)
+        # print(serializer.validated_data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -115,3 +118,14 @@ class CreateAppointment(APIView):
         serializer = AppointmentsSerializer(appointment)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        # except Professional.ObjectDoesNotExist:
+        #     return Response(
+        #         {"message": "Professional not registered"},
+        #         status=status.HTTP_404_NOT_FOUND,
+        #     )
+
+        # except Patient.DoesNotExist:
+        #     return Response(
+        #         {"message": "Patient not registered"}, status=status.HTTP_404_NOT_FOUND
+        #     )

@@ -1,6 +1,7 @@
 from django.urls import path
 from .views import AdminView, LoginUserView, PatientsView, PatientByIdView, ProfessionalsView, ProfessionalsByIdView
 
+
 urlpatterns = [
     # path('user/'),
     path('login/', LoginUserView.as_view()),
