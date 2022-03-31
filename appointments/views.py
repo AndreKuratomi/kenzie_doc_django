@@ -12,7 +12,7 @@ from user.models import Patient, Professional, User
 from user.serializers import PatientSerializer, ProfessionalSerializer, NewPatientSerializer
 
 from .models import AppointmentsModel
-from .serializers import AllAppointmentsSerializer, AppPatientSerializer, AppProfessonalSerializer, AppointmentsSerializer
+from .serializers import AllAppointmentsSerializer, AppPatientSerializer, AppProfessonalSerializer, AppointmentsSerializer, AppointmentsToUpdateSerializer
 from .permissions import AppointmentByIdForProfessionalPermission, AppointmentPermission
 
 import ipdb
@@ -67,10 +67,8 @@ class SpecificAppointmentView(APIView):
     permission_classes = [AppointmentPermission]
 
     def get(self, request, appointment_id=''):
-        print("eita")
         try:
             appointment = AppointmentsModel.objects.get(uuid=appointment_id)
-            print(appointment)
 
             if appointment:
 
@@ -82,6 +80,43 @@ class SpecificAppointmentView(APIView):
             return Response(
                 {"message": "Appointment not registered"}, status=status.HTTP_404_NOT_FOUND,
             )
+
+    def patch(self, request, appointment_id=''):
+        try:
+            appointment = AppointmentsModel.objects.get(uuid=appointment_id)
+            # user = User.objects.get(professional=professional)
+            if appointment:
+                serialized = AppointmentsToUpdateSerializer(data=request.data, partial=True)
+
+                if serialized.is_valid():
+                    data = {**serialized.validated_data}
+
+                    for key, value in data.items():
+                        appointment.__dict__[key] = value
+
+                    appointment.save()
+
+                    updated_appointment = AppointmentsModel.objects.get(uuid=appointment_id)
+                    serialized = AppointmentsSerializer(updated_appointment)
+
+                    return Response(serialized.data, status=status.HTTP_200_OK)
+
+        except AppointmentsModel.DoesNotExist:
+            return Response({'message': 'Appointment does not exist'}, status=status.HTTP_404_NOT_FOUND)
+
+    def delete(self, request, appointment_id=''):
+        try:
+            appointment = AppointmentsModel.objects.get(uuid=appointment_id)
+
+            if appointment:
+
+                appointment.delete()
+
+                return Response(status=status.HTTP_204_NO_CONTENT)
+
+        except AppointmentsModel.DoesNotExist:
+            return Response({'message': 'Appointment does not exist'}, status=status.HTTP_404_NOT_FOUND)
+
 
 class NotFinishedAppointmentView(APIView):
 
