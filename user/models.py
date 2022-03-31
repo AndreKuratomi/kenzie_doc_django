@@ -55,6 +55,9 @@ class Patient(models.Model):
     cpf = models.CharField(primary_key=True, max_length=11, editable=False)
     age = models.CharField(max_length=255)
     sex = models.CharField(max_length=255)
+    first_name = models.CharField(max_length=255)
+    last_name = models.CharField(max_length=255)
+    phone = models.CharField(max_length=255)
 
 class Professional(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

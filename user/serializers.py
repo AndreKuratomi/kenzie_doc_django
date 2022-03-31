@@ -5,7 +5,7 @@ from kenziedoc.exceptions import PatientAlreadyExistsError, UserAlreadyExistsErr
 from user.models import Patient, User
 from .services import is_valid_uuid
 
-# import ipdb
+import ipdb
 
 
 class UserSerializer(serializers.Serializer):
@@ -85,7 +85,7 @@ class PatientSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = User.objects.create_user(email=validated_data['user']['email'], password=validated_data['user']['password'])
-        new_patient = Patient.objects.create(user=user, cpf=validated_data['cpf'], age=validated_data['age'], sex=validated_data['sex'])
+        new_patient = Patient.objects.create(user=user, cpf=validated_data['cpf'], age=validated_data['age'], sex=validated_data['sex'], first_name=validated_data['first_name'], last_name=validated_data['last_name'], phone=validated_data['phone'])
 
         return new_patient
 
@@ -96,6 +96,15 @@ class PatientIdSerializer(serializers.ModelSerializer):
     class Meta:
         model = Patient
         fields = "__all__"
+
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop('user')
+        user = User.objects.filter(uuid=instance.user.uuid).update(**user_data)
+        patient = Patient.objects.filter(cpf=instance.cpf).update(**validated_data)
+
+        updated_patient = Patient.objects.get(cpf=instance.cpf)
+
+        return updated_patient
 
 
 class AdminSerializer(serializers.Serializer):
