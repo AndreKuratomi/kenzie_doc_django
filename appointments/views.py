@@ -6,8 +6,13 @@ from rest_framework.response import Response
 from rest_framework import status
 # from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
-# from rest_framework.decorators import authentication_classes, permission_classes
+from django.core.exceptions import ObjectDoesNotExist
+from rest_framework.decorators import authentication_classes, permission_classes
 
+from user.views import ProfessionalsByIdView
+from .models import AppointmentsModel
+from .serializers import AllAppointmentsSerializer, AppPatientSerializer, AppProfessonalSerializer, AppointmentsSerializer, AppointmentsToUpdateSerializer
+from .permissions import AppointmentPermission
 from user.models import Patient, Professional, User
 from user.serializers import PatientSerializer, ProfessionalSerializer, NewPatientSerializer
 
@@ -36,7 +41,7 @@ class SpecificPatientView(APIView):
 
 
 class SpecificProfessionalView(APIView):
-
+    print('***')
     authentication_classes = [TokenAuthentication]
     permission_classes = [AppointmentPermission]
 
@@ -127,10 +132,10 @@ class NotFinishedAppointmentView(APIView):
             for unfinished in not_finished_appointment:
                 serializer = AppointmentsSerializer(unfinished)
 
-            return response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
         except ObjectDoesNotExist:
-            return response(
+            return Response(
                 {"message": "Professional not registered"},
                 status=status.HTTP_404_NOT_FOUND,
             )
@@ -170,14 +175,3 @@ class CreateAppointment(APIView):
         serializer = AppointmentsSerializer(appointment)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        # except Professional.ObjectDoesNotExist:
-        #     return Response(
-        #         {"message": "Professional not registered"},
-        #         status=status.HTTP_404_NOT_FOUND,
-        #     )
-
-        # except Patient.DoesNotExist:
-        #     return Response(
-        #         {"message": "Patient not registered"}, status=status.HTTP_404_NOT_FOUND
-        #     )
