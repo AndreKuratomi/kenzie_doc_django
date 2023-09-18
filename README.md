@@ -21,9 +21,9 @@ Esta aplicação utiliza o framework Django.</p>
 
 <h5>0. Primeiramente, é necessário já ter instalado na própria máquina:</h5>
 
-- <p> Um <b>editor de código</b>, conhecido também como <b>IDE</b>. Por exemplo, o <b>[Visual Studio Code (VSCode)](https://code.visualstudio.com/)</b>.</p>
+- Um <b>editor de código</b>, conhecido também como <b>IDE</b>. Por exemplo, o <b>[Visual Studio Code (VSCode)](https://code.visualstudio.com/)</b>.
 
-- <p> Uma <b>ferramenta cliente de API REST</b>. Por exemplo, o <b>[Insomnia](https://insomnia.rest/download)</b> ou o <b>[Postman](https://www.postman.com/product/rest-client/)</b>.</p>
+- Uma <b>ferramenta cliente de API REST</b>. Por exemplo, o <b>[Insomnia](https://insomnia.rest/download)</b> ou o <b>[Postman](https://www.postman.com/product/rest-client/)</b>.
 
 - <p> E versionar o diretório para receber o clone da aplicação:</p>
 
@@ -35,13 +35,13 @@ git init
 <h5>1. Fazer o clone do reposítório <span>KenzieDoc</span> na sua máquina pelo terminal do computador ou pelo do IDE:</h5>
 
 ```
-git clone git@gitlab.com:pierrekalil1/capstone-q4-django.git
+git clone https://github.com/AndreKuratomi/kenzie_doc_django.git
 ```
 
 <p>Entrar na pasta criada:</p>
 
 ```
-cd capstone-q4-django
+cd kenzie_doc_django
 ```
 
 Após feito o clone do repositório KenzieDoc, instalar:
