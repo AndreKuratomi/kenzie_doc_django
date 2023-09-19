@@ -14,7 +14,7 @@
 
 A aplicação também possibilita ao paciente fazer uma busca pelo profissional mais adequado para sua necessidade e agendar a consulta de forma confortável, prática e rápida.
 
-Esta aplicação utiliza o framework <b>Django</b> e o banco de daso <b>SQLite3</b>.</p>
+Esta aplicação utiliza o framework <b>Django</b> e o banco de dados <b>SQLite3</b>.</p>
 <br>
 
 # Instalação
