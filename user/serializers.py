@@ -1,6 +1,6 @@
 from email.headerregistry import Address
 from rest_framework import serializers
-from kenziedoc.exceptions import PatientAlreadyExistsError, UserAlreadyExistsError
+from kenziedoc_project.exceptions import PatientAlreadyExistsError, UserAlreadyExistsError
 
 from user.models import Patient, User
 from .services import is_valid_uuid
