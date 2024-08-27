@@ -1,10 +1,11 @@
 from email.headerregistry import Address
 from rest_framework import serializers
-from kenziedoc.exceptions import PatientAlreadyExistsError, UserAlreadyExistsError
+from kenziedoc_project.exceptions import PatientAlreadyExistsError, UserAlreadyExistsError
 
 from user.models import Patient, User
 from .services import is_valid_uuid
 
+import ipdb
 
 
 class UserSerializer(serializers.Serializer):
@@ -29,13 +30,13 @@ class LoginUserSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
 
-class AddressSerializer(serializers.Serializer):
-    uuid = serializers.UUIDField(read_only=True)
-    street = serializers.CharField()
-    house_number = serializers.IntegerField()
-    state = serializers.CharField()
+# class AddressSerializer(serializers.Serializer):
+#     uuid = serializers.UUIDField(read_only=True)
+#     street = serializers.CharField()
+#     house_number = serializers.IntegerField()
+#     state = serializers.CharField()
 
-    users = UserSerializer(many=True)
+#     users = UserSerializer(many=True)
 
 
 class ProfessionalSerializer(serializers.Serializer):
@@ -46,11 +47,11 @@ class ProfessionalSerializer(serializers.Serializer):
     phone = serializers.CharField()  
 
 
-class NewPatientSerializer(serializers.Serializer):
-    user = UserSerializer(read_only=True)
-    cpf = serializers.CharField()
-    age = serializers.CharField()
-    sex = serializers.CharField()
+# class NewPatientSerializer(serializers.Serializer):
+#     user = UserSerializer(read_only=True)
+#     cpf = serializers.CharField()
+#     age = serializers.CharField()
+#     sex = serializers.CharField()
 
 
 class PatientSerializer(serializers.ModelSerializer):
@@ -65,16 +66,17 @@ class PatientSerializer(serializers.ModelSerializer):
         }
 
     def validate(self, attrs):
+        # ipdb.set_trace()
         email = attrs['user']['email']
 
-        does_user_already_exists = User.objects.filter(email=email).exists()
-        if does_user_already_exists is True:
+        does_user_already_exist = User.objects.filter(email=email).exists()
+        if does_user_already_exist is True:
             raise UserAlreadyExistsError()
 
         cpf = attrs['cpf']
 
-        does_patient_already_exists = Patient.objects.filter(cpf=cpf).exists()
-        if does_patient_already_exists is True:
+        does_patient_already_exist = Patient.objects.filter(cpf=cpf).exists()
+        if does_patient_already_exist is True:
             raise PatientAlreadyExistsError()
 
         return super().validate(attrs)
@@ -84,7 +86,6 @@ class PatientSerializer(serializers.ModelSerializer):
         new_patient = Patient.objects.create(user=user, cpf=validated_data['cpf'], age=validated_data['age'], sex=validated_data['sex'])
 
         return new_patient
-
 
 
 class PatientIdSerializer(serializers.ModelSerializer):
@@ -98,11 +99,11 @@ class PatientIdSerializer(serializers.ModelSerializer):
         user_data = validated_data.pop('user')
         user = User.objects.filter(uuid=instance.user.uuid).update(**user_data)
         patient = Patient.objects.filter(cpf=instance.cpf).update(**validated_data)
+        ipdb.set_trace()
 
         updated_patient = Patient.objects.get(cpf=instance.cpf)
 
         return updated_patient
-
 
 
 class AdminSerializer(serializers.Serializer):

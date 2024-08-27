@@ -3,7 +3,7 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import BaseUserManager
 import uuid
 
-# Create your models here.
+
 class UsersModel(BaseUserManager):
     def create_user(self, email, password, is_prof=False, is_admin=False, **extra_fields):
         if not email:
@@ -25,6 +25,7 @@ class UsersModel(BaseUserManager):
     def create_user_adm(self, email, password, **extra_fields):
         return self._create_user(email, password, False, True, **extra_fields)
 
+
 class User(AbstractUser):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     is_prof = models.BooleanField(default=False)
@@ -38,9 +39,11 @@ class User(AbstractUser):
 
     objects = UsersModel()
 
+
 class UserLogin(models.Model):
     email = models.EmailField(max_length=255, unique=True)
     password = models.CharField(max_length=255, unique=False)
+
 
 class Address(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -56,7 +59,6 @@ class Patient(models.Model):
     age = models.CharField(max_length=255)
     sex = models.CharField(max_length=255)
     phone = models.CharField(max_length=255)
-
 
 
 class Professional(models.Model):
