@@ -320,6 +320,35 @@ class ProfessionalsByIdView(APIView):
             return Response({"message": "Professional does not exist"}, status=status.HTTP_404_NOT_FOUND)
 
 
+class ProfessionalsBySpecialtyView(APIView):
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [ProfessionalsPermissions]
+
+    def get(self, request, specialty=''):
+
+        try:
+            professional = Professional.objects.get(specialty=specialty.capitalize())
+            user = User.objects.get(professional=professional)
+
+            if request.user.is_admin == False:
+                if user != request.user:
+                    return Response(
+                        {
+                            "detail": "You do not have permission to perform this action."
+                        },  
+                        status=status.HTTP_401_UNAUTHORIZED
+                    )
+
+            serializer = ProfessionalSerializer(professional)
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Professional.DoesNotExist:
+            return Response(
+                {'message': 'No professionals for this specialty!'}, status=status.HTTP_404_NOT_FOUND,
+            )        
+
 
 class AdminView(APIView):
 
