@@ -122,13 +122,26 @@ reg.exe add HKLM\SYSTEM\CurrentControlSet\Control\FileSystem /v LongPathsEnabled
 ```
 <br>
 
-<h3>3. E rodar a aplicação:</h3>
+<h3>3. Abrir a aplicação no IDE:</h3>
 
 ```
 code .
 ```
 <br>
 
+<h3>4. E executá-la:</h3>
+
+LINUX:
+```
+python manage.py runserver
+```
+
+WINDOWS:
+```
+py manage.py runserver
+```
+
+<br>
 
 # Documentação
 
