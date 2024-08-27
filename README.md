@@ -57,6 +57,7 @@ Configure o git para desabilitar a certificação SSL:
 git config --global http.sslVerify "false"
 ```
 
+
 <p>Entrar na pasta criada:</p>
 
 ```
@@ -75,7 +76,7 @@ python3 -m venv venv --upgrade-deps
 
 WINDOWS:
 ```
-py -m venv venv
+py -m venv venv --upgrade-deps
 ```
 
 <h4>Ative o seu ambiente virtual com o comando:</h4>
