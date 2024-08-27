@@ -1,4 +1,4 @@
-## kenzie_doc_django
+# kenzie_doc_django
 
 - [Sobre](#sobre)
 - [Instalação](#instalação)
@@ -8,16 +8,17 @@
 
 <br>
 
-# Sobre
+## Sobre
 
 <p>A API <b>kenzie_doc_django</b> se propõe a cadastrar médicos e pacientes na plataforma possibilitando o agendamento de consultas de maneira simples e intuitiva, além de fazer a gestão de consultas agendadas e da lista de espera.
 
 A aplicação também possibilita ao paciente fazer uma busca pelo profissional mais adequado para sua necessidade e agendar a consulta de forma confortável, prática e rápida.
 
 Esta aplicação utiliza o framework <b>Django</b> e o banco de dados <b>SQLite3</b>.</p>
+
 <br>
 
-# Instalação
+## Instalação
 
 
 <h3>0. Primeiramente, é necessário já ter instalado na própria máquina:</h3>
@@ -144,7 +145,7 @@ py manage.py runserver
 
 <br>
 
-# Documentação
+## Documentação
 
 Para ter acesso ao descrições detalhes das rotas e seus retornos, conferir documentação completa no link a seguir:
 
@@ -187,6 +188,6 @@ https://kenziedoc-django-api-documentation.vercel.app/
 
 <br>
 
-# Termos de uso
+## Termos de uso
 
 Esse projeto atende a fins exclusivamente didáticos e sem nenhum intuito comercial.
