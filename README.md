@@ -151,7 +151,7 @@ Para ter acesso ao descrições detalhes das rotas e seus retornos, conferir doc
 
 https://kenziedoc-django-api-documentation.vercel.app/
 
-# Desenvolvedores da API
+## Desenvolvedores da API
 
 <div>
     <p>Pierre Kalil - Techlead</p><a href="https://www.linkedin.com/in/pierre-kalil/" target="_blank" ><img src="https://img.shields.io/badge/-LinkedIn-%230077B5?style=for-the-badge&logo=linkedin&logoColor=white" target="_blank"></a> 
