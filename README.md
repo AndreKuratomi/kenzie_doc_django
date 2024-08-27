@@ -151,6 +151,8 @@ Para ter acesso ao descrições detalhes das rotas e seus retornos, conferir doc
 
 https://kenziedoc-django-api-documentation.vercel.app/
 
+<br>
+
 ## Desenvolvedores da API
 
 <div>
