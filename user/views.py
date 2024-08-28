@@ -10,9 +10,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authentication import authenticate
 
+from utils.functions import is_this_user_admin_or_the_user_himself, is_this_user_admin
+
 from .models import Patient, Professional, User, Admin
 from .serializers import AdminSerializer, LoginUserSerializer, PatientIdSerializer, PatientSerializer, ProfessionalSerializer
-from .permissions import IsAdmin, ProfessionalsPermissions
+from .permissions import IsAdmin, OwnProfessionalsOrAdminPermissions
 
 import ipdb
 
@@ -103,14 +105,7 @@ class PatientByIdView(RetrieveUpdateDestroyAPIView):
             patient = Patient.objects.get(cpf=patient_id)
             user = User.objects.get(patient=patient)
 
-            if request.user.is_admin == False:
-                if user != request.user:
-                    return Response(
-                        {
-                            "detail": "You do not have permission to perform this action."
-                        },  
-                        status=status.HTTP_401_UNAUTHORIZED
-                    )
+            is_this_user_admin_or_the_user_himself(request, user)
 
             serializer = PatientSerializer(patient)
 
@@ -127,14 +122,7 @@ class PatientByIdView(RetrieveUpdateDestroyAPIView):
             patient = Patient.objects.get(cpf=patient_id)
             user = User.objects.get(patient=patient)
             # ipdb.set_trace()
-            if request.user.is_admin == False:
-                if user != request.user:
-                    return Response(
-                        {
-                            "detail": "You do not have permission to perform this action."
-                        },  
-                        status=status.HTTP_401_UNAUTHORIZED
-                    )
+            is_this_user_admin_or_the_user_himself(request, user)
 
             serialized = PatientIdSerializer(data=request.data, partial=True)
 
@@ -231,21 +219,18 @@ class ProfessionalsView(APIView):
 class ProfessionalsByIdView(APIView):
 
     authentication_classes = [TokenAuthentication]
-    permission_classes = [ProfessionalsPermissions]
+
+    def get_permissions(self):
+        if self.request.method == 'DELETE':
+            self.permission_classes = [IsAdmin]
+        else:
+            self.permission_classes = [OwnProfessionalsOrAdminPermissions]
+        
+        return super().get_permissions()
 
     def get(self, request, council_number=''):
         try:
             professional = Professional.objects.get(council_number=council_number)
-            user = User.objects.get(professional=professional)
-
-            if request.user.is_admin == False:
-                if user != request.user:
-                    return Response(
-                        {
-                            "detail": "You do not have permission to perform this action."
-                        },  
-                        status=status.HTTP_401_UNAUTHORIZED
-                    )
 
             serializer = ProfessionalSerializer(professional)
 
@@ -261,15 +246,6 @@ class ProfessionalsByIdView(APIView):
         try:
             professional = Professional.objects.get(council_number=council_number)
             user = User.objects.get(professional=professional)
-
-            if request.user.is_admin == False:
-                if user != request.user:
-                    return Response(
-                        {
-                            "detail": "You do not have permission to perform this action."
-                        },  
-                        status=status.HTTP_401_UNAUTHORIZED
-                    )
 
             serialized = ProfessionalSerializer(data=request.data, partial=True)
             serialized.is_valid()
@@ -308,15 +284,6 @@ class ProfessionalsByIdView(APIView):
         try:
             professional = Professional.objects.get(council_number=council_number)
             user = User.objects.get(professional=professional)
-
-            if request.user.is_admin == False:
-                if user != request.user:
-                    return Response(
-                        {
-                            "detail": "You do not have permission to perform this action."
-                        },  
-                        status=status.HTTP_401_UNAUTHORIZED
-                    )
                 
             user.delete()
 
@@ -329,21 +296,14 @@ class ProfessionalsByIdView(APIView):
 class ProfessionalsBySpecialtyView(APIView):
 
     authentication_classes = [TokenAuthentication]
-    permission_classes = [ProfessionalsPermissions]
+    permission_classes = [OwnProfessionalsOrAdminPermissions]
 
     def get(self, request, specialty=''):
         try:
             professionals_by_specialty = Professional.objects.filter(specialty=specialty.capitalize())
             serialized = ProfessionalSerializer(professionals_by_specialty, many=True)
 
-            if request.user.is_admin == False:
-                return Response(
-                    {
-                        "detail": "You do not have permission to perform this action."
-                    },  
-                    status=status.HTTP_401_UNAUTHORIZED
-                )
-
+            is_this_user_admin_or_the_user_himself(request, user)
             return Response(serialized.data, status=status.HTTP_200_OK)
 
         except Professional.DoesNotExist:
