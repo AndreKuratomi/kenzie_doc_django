@@ -223,6 +223,8 @@ class ProfessionalsByIdView(APIView):
     def get_permissions(self):
         if self.request.method == 'DELETE':
             self.permission_classes = [IsAdmin]
+        elif self.request.method == 'GET':
+            self.permission_classes = [IsJustLogged]
         else:
             self.permission_classes = [OwnProfessionalsOrAdminPermissions]
         
@@ -231,7 +233,6 @@ class ProfessionalsByIdView(APIView):
     def get(self, request, council_number=''):
         try:
             professional = Professional.objects.get(council_number=council_number)
-
             serializer = ProfessionalSerializer(professional)
 
             return Response(serializer.data, status=status.HTTP_200_OK)
