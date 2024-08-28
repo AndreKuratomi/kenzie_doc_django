@@ -14,7 +14,7 @@ from utils.functions import is_this_user_admin_or_the_user_himself, is_this_user
 
 from .models import Patient, Professional, User, Admin
 from .serializers import AdminSerializer, LoginUserSerializer, PatientIdSerializer, PatientSerializer, ProfessionalSerializer
-from .permissions import IsAdmin, IsJustLogged, OwnProfessionalsOrAdminPermissions
+from .permissions import IsAdmin, IsJustLogged, PatientSelfOrAdminPermissions, ProfessionalSelfOrAdminPermissions
 
 import ipdb
 
@@ -42,7 +42,9 @@ class LoginUserView(APIView):
 class PatientsView(APIView):
 
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAdmin]
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            self.permission_classes = [IsAdmin]
 
     def post(self, request):
         try:
@@ -88,17 +90,18 @@ class PatientsView(APIView):
 class PatientByIdView(RetrieveUpdateDestroyAPIView):
 
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAdmin]
+    def get_permissions(self):
+        if self.request.method == 'DELETE':
+            self.permission_classes = [IsAdmin]
+        else:
+            self.permission_classes = [PatientSelfOrAdminPermissions]
 
     lookup_url_kwarg = "patient_id"
 
     def get(self, request, patient_id=''):
-
         try:
             patient = Patient.objects.get(cpf=patient_id)
             user = User.objects.get(patient=patient)
-
-            is_this_user_admin_or_the_user_himself(request, user)
 
             serializer = PatientSerializer(patient)
 
@@ -110,12 +113,9 @@ class PatientByIdView(RetrieveUpdateDestroyAPIView):
             )        
 
     def patch(self, request, patient_id=''):
-
         try:
             patient = Patient.objects.get(cpf=patient_id)
             user = User.objects.get(patient=patient)
-            # ipdb.set_trace()
-            is_this_user_admin_or_the_user_himself(request, user)
 
             serialized = PatientIdSerializer(data=request.data, partial=True)
 
@@ -221,7 +221,7 @@ class ProfessionalsByIdView(APIView):
         elif self.request.method == 'GET':
             self.permission_classes = [IsJustLogged]
         else:
-            self.permission_classes = [OwnProfessionalsOrAdminPermissions]
+            self.permission_classes = [ProfessionalSelfOrAdminPermissions]
         
         return super().get_permissions()
 
