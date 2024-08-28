@@ -21,31 +21,25 @@ import ipdb
 
 class LoginUserView(APIView):
     def post(self, request):
-        serializer = LoginUserSerializer(data=request.data)
+        try:
+            serializer = LoginUserSerializer(data=request.data)
 
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        user = authenticate(email=serializer.validated_data['email'], password=serializer.validated_data['password'])
+            user = authenticate(email=serializer.validated_data['email'], password=serializer.validated_data['password'])
 
-        if user is not None:
-            token = Token.objects.get_or_create(user=user)[0]
-            return Response({'token': token.key})
-        else:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-
-
-
-# class PatientsView(ListCreateAPIView):
-
-#     queryset = Patient.objects.all()
-#     serializer_class = PatientSerializer
-
-#     authentication_classes = [TokenAuthentication]
-#     permission_classes = [IsAdmin]
+            if user is not None:
+                token = Token.objects.get_or_create(user=user)[0]
+                return Response({'token': token.key})
+            else:
+                return Response(status=status.HTTP_401_UNAUTHORIZED)
+        
+        except Exception as e:
+            return Response({"error": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class PatientView(APIView):
+class PatientsView(APIView):
 
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAdmin]
@@ -60,7 +54,7 @@ class PatientView(APIView):
 
             if Patient.objects.filter(cpf=serializer.validated_data['cpf']).exists() == True:
                 return Response({"message": "This patient already exists"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-            # print(data, '*'*100)
+
             user = User.objects.create_user(data['user']['email'], data['user']['password'])
             patient = Patient.objects.create(
                 user=user, 
@@ -83,7 +77,6 @@ class PatientView(APIView):
     def get(self, request):
         try:
             patients = Patient.objects.all()
-
             serialized = PatientSerializer(patients, many=True)
 
             return Response(serialized.data, status=status.HTTP_200_OK)
@@ -208,12 +201,14 @@ class ProfessionalsView(APIView):
             return Response({"message": "This professional already exists"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
     def get(self, request):
+        try:
+            professionals = Professional.objects.all()
+            serialized = ProfessionalSerializer(professionals, many=True)
 
-        professionals = Professional.objects.all()
+            return Response(serialized.data, status=status.HTTP_200_OK)
 
-        serialized = ProfessionalSerializer(professionals, many=True)
-
-        return Response(serialized.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": f"Something went wrong: {e}"})
 
 
 class ProfessionalsByIdView(APIView):
@@ -323,9 +318,7 @@ class AdminView(APIView):
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
             user = User.objects.create_user(data['email'], data['password'], is_admin=True)
-
             admin = Admin.objects.create(user=user, name=request.data['name'])
-
             serializer = AdminSerializer(admin)
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -334,9 +327,11 @@ class AdminView(APIView):
             return Response({"message": "This admin already exists"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
     def get(self, request):
+        try:
+            admin = Admin.objects.all()
+            serialized = AdminSerializer(admin, many=True)
 
-        admin = Admin.objects.all()
+            return Response(serialized.data, status=status.HTTP_200_OK)
 
-        serialized = AdminSerializer(admin, many=True)
-
-        return Response(serialized.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": f"Something went wrong: {e}"})
