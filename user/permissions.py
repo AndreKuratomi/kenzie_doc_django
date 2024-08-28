@@ -10,6 +10,13 @@ class IsAdmin(BasePermission):
         return bool(request.user.is_authenticated and request.user.is_admin)
 
 
+class IsJustLogged(BasePermission):
+    def has_permission(self, request, view):
+        if request.user.is_authenticated:
+            return True
+        return False
+        
+
 class OwnProfessionalsOrAdminPermissions(BasePermission):
     def has_permission(self, request, view):
         if request.user.is_authenticated and request.user.is_admin:

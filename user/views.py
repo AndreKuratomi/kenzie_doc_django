@@ -14,7 +14,7 @@ from utils.functions import is_this_user_admin_or_the_user_himself, is_this_user
 
 from .models import Patient, Professional, User, Admin
 from .serializers import AdminSerializer, LoginUserSerializer, PatientIdSerializer, PatientSerializer, ProfessionalSerializer
-from .permissions import IsAdmin, OwnProfessionalsOrAdminPermissions
+from .permissions import IsAdmin, IsJustLogged, OwnProfessionalsOrAdminPermissions
 
 import ipdb
 
@@ -296,14 +296,13 @@ class ProfessionalsByIdView(APIView):
 class ProfessionalsBySpecialtyView(APIView):
 
     authentication_classes = [TokenAuthentication]
-    permission_classes = [OwnProfessionalsOrAdminPermissions]
+    permission_classes = [IsJustLogged]
 
     def get(self, request, specialty=''):
         try:
             professionals_by_specialty = Professional.objects.filter(specialty=specialty.capitalize())
             serialized = ProfessionalSerializer(professionals_by_specialty, many=True)
 
-            is_this_user_admin_or_the_user_himself(request, user)
             return Response(serialized.data, status=status.HTTP_200_OK)
 
         except Professional.DoesNotExist:
