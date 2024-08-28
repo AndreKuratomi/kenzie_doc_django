@@ -46,6 +46,8 @@ class PatientsView(APIView):
         if self.request.method == 'GET':
             self.permission_classes = [IsAdmin]
 
+        return super().get_permissions()
+
     def post(self, request):
         try:
             serializer = PatientSerializer(data=request.data)
@@ -95,13 +97,17 @@ class PatientByIdView(RetrieveUpdateDestroyAPIView):
             self.permission_classes = [IsAdmin]
         else:
             self.permission_classes = [PatientSelfOrAdminPermissions]
+        
+        return super().get_permissions()
 
     lookup_url_kwarg = "patient_id"
 
     def get(self, request, patient_id=''):
         try:
             patient = Patient.objects.get(cpf=patient_id)
-            user = User.objects.get(patient=patient)
+            
+            # grant has_object_permission is going to be read because patient was manually called:            
+            self.check_object_permissions(request, patient)
 
             serializer = PatientSerializer(patient)
 
@@ -116,6 +122,8 @@ class PatientByIdView(RetrieveUpdateDestroyAPIView):
         try:
             patient = Patient.objects.get(cpf=patient_id)
             user = User.objects.get(patient=patient)
+            # grant has_object_permission is going to be read because patient was manually called:
+            self.check_object_permissions(request, patient)
 
             serialized = PatientIdSerializer(data=request.data, partial=True)
 
