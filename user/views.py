@@ -90,7 +90,6 @@ class PatientView(APIView):
             return Response({"error": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
 
 
-
 class PatientByIdView(RetrieveUpdateDestroyAPIView):
 
     authentication_classes = [TokenAuthentication]
@@ -210,12 +209,13 @@ class ProfessionalsView(APIView):
                 council_number=request.data['council_number'], 
                 name=request.data['name'],
                 phone=request.data['phone'],
-                specialty=request.data['specialty']
+                specialty=request.data['specialty'].capitalize()
                 )
           
             serializer = ProfessionalSerializer(professional)
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+
         except IntegrityError:
             return Response({"message": "This professional already exists"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
@@ -234,7 +234,6 @@ class ProfessionalsByIdView(APIView):
     permission_classes = [ProfessionalsPermissions]
 
     def get(self, request, council_number=''):
-
         try:
             professional = Professional.objects.get(council_number=council_number)
             user = User.objects.get(professional=professional)
@@ -259,7 +258,6 @@ class ProfessionalsByIdView(APIView):
         
 
     def patch(self, request, council_number=''):
-
         try:
             professional = Professional.objects.get(council_number=council_number)
             user = User.objects.get(professional=professional)
@@ -277,29 +275,36 @@ class ProfessionalsByIdView(APIView):
             serialized.is_valid()
             
             data = {**serialized.validated_data}
-
+            
+            # Council_number update not allowed:
             if 'council_number' in data:
                 if Professional.objects.filter(council_number=request.data['council_number']).exists() == True:
-                    response = {"message": "This council_number already exists"}
+                    response = {"message": "Council_number can't be updated!"}
                     return Response(response, status=status.HTTP_422_UNPROCESSABLE_ENTITY)                   
                 
+            # User data update if provided:
+            user_data = request.data.get("user", {})
+            if user_data:
+                for key, value in user_data.items():
+                    setattr(user, key, value)
+                user.save()
 
-            for key, value in data.items():
-                professional.__dict__[key] = value
-            
+            # Professional update if provided:
+            professional_data = {key: value for key, value in serialized.validated_data.items() if key != 'user'}
+            for key, value in professional_data.items():
+                setattr(professional, key, value)
             professional.save()
 
             professional = Professional.objects.get(council_number=council_number)
             serialized = ProfessionalSerializer(professional)
 
-            return Response(serialized.data)        
+            return Response(serialized.data, status=status.HTTP_200_OK)        
 
         except Professional.DoesNotExist:
             return Response({'message': 'Professional does not exist'}, status=status.HTTP_404_NOT_FOUND)
     
 
     def delete(self, request, council_number=''):
-
         try:
             professional = Professional.objects.get(council_number=council_number)
             user = User.objects.get(professional=professional)
@@ -316,6 +321,7 @@ class ProfessionalsByIdView(APIView):
             user.delete()
 
             return Response(status=status.HTTP_204_NO_CONTENT)
+
         except Professional.DoesNotExist:
             return Response({"message": "Professional does not exist"}, status=status.HTTP_404_NOT_FOUND)
 
@@ -326,23 +332,19 @@ class ProfessionalsBySpecialtyView(APIView):
     permission_classes = [ProfessionalsPermissions]
 
     def get(self, request, specialty=''):
-
         try:
-            professional = Professional.objects.get(specialty=specialty.capitalize())
-            user = User.objects.get(professional=professional)
+            professionals_by_specialty = Professional.objects.filter(specialty=specialty.capitalize())
+            serialized = ProfessionalSerializer(professionals_by_specialty, many=True)
 
             if request.user.is_admin == False:
-                if user != request.user:
-                    return Response(
-                        {
-                            "detail": "You do not have permission to perform this action."
-                        },  
-                        status=status.HTTP_401_UNAUTHORIZED
-                    )
+                return Response(
+                    {
+                        "detail": "You do not have permission to perform this action."
+                    },  
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
 
-            serializer = ProfessionalSerializer(professional)
-
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serialized.data, status=status.HTTP_200_OK)
 
         except Professional.DoesNotExist:
             return Response(
@@ -367,6 +369,7 @@ class AdminView(APIView):
             serializer = AdminSerializer(admin)
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+
         except IntegrityError:
             return Response({"message": "This admin already exists"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
