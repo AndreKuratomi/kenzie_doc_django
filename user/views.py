@@ -33,7 +33,7 @@ class LoginUserView(APIView):
                 token = Token.objects.get_or_create(user=user)[0]
                 return Response({'token': token.key})
             else:
-                return Response(status=status.HTTP_401_UNAUTHORIZED)
+                return Response({"Login error": "Please check login data."}, status=status.HTTP_401_UNAUTHORIZED)
         
         except Exception as e:
             return Response({"error": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
