@@ -28,10 +28,19 @@ class UsersModel(BaseUserManager):
 
 class User(AbstractUser):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    cpf = models.CharField(primary_key=False, max_length=11, editable=False)
+
     is_prof = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
-    email = models.EmailField(max_length=255, unique=True)
+
+    name = models.CharField(max_length=255)
+    surname = models.CharField(max_length=255)
     username = models.CharField(unique=False, null=True, max_length=255)
+    age = models.IntegerField()
+    sex = models.CharField(max_length=1)
+    email = models.EmailField(max_length=255, unique=True)
+    phone = models.CharField(max_length=11)
+    
     address = models.ForeignKey("Address", on_delete=models.CASCADE, related_name='users', null=True)
 
     USERNAME_FIELD = 'email'
@@ -47,30 +56,24 @@ class UserLogin(models.Model):
 
 class Address(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    street = models.CharField(max_length=255)
-    house_number = models.IntegerField()
-    state = models.CharField(max_length=255)
+    street = models.CharField(max_length=255, blank=True)
+    house_number = models.CharField(max_length=255)
+    post_code = models.CharField(max_length=255) # use a separate API for filling the blank ones
+    city = models.CharField(max_length=255, blank=True)
+    state = models.CharField(max_length=2, blank=True)
 
 
 class Patient(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    cpf = models.CharField(primary_key=True, max_length=11, editable=False)
-    name = models.CharField(max_length=255)
-    age = models.CharField(max_length=255)
-    sex = models.CharField(max_length=255)
-    phone = models.CharField(max_length=255)
 
 
 class Professional(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     council_number = models.CharField(primary_key=True, max_length=8, editable=False)
-    name = models.CharField(max_length=255)
-    phone = models.CharField(max_length=255)
     specialty = models.CharField(max_length=255)
     patients = models.ManyToManyField(Patient)
 
 
 class Admin(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=255)
 
