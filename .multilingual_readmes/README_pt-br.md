@@ -1,10 +1,19 @@
 # kenzie_doc_django
 
 - [Sobre](#sobre)
+- [Diagrama](#diagrama)
 - [Instalação](#instalação)
 - [Documentação](#documentação)
 - [Desenvolvedores da API](#desenvolvedores-da-api)
+- [Referências](#referências)
 - [Termos de uso](#termos-de-uso)
+
+<br>
+
+## Traduções
+
+- [English / Inglês](https://github.com/AndreKuratomi/kenzie_doc_django)
+- [Português brasileiro / Brazilian portuguese](/.multilingual_readmes/README.pt-br.md)
 
 <br>
 
@@ -14,7 +23,16 @@
 
 A aplicação também possibilita ao paciente fazer uma busca pelo profissional mais adequado para sua necessidade e agendar a consulta de forma confortável, prática e rápida.
 
-Esta aplicação utiliza o framework <b>Django</b> e o banco de dados <b>SQLite3</b>.</p>
+Esta aplicação utiliza a linguagem <strong>[Python](https://www.python.org/downloads/)</strong>, seu framework <strong>[Django](https://www.djangoproject.com/)</strong> e o banco de dados <strong>[SQLite3](https://docs.python.org/3/library/sqlite3.html)</strong>.</p>
+
+<br>
+
+## Diagrama
+
+<figure>
+    <img src="./kenzie_doc_django.drawio.png" alt="diagrama api kenzie_doc_django">
+    <figcaption style="text-align: center">Diagrama API kenzie_doc_django</figcaption>
+</figure>
 
 <br>
 
@@ -68,7 +86,7 @@ cd kenzie_doc_django
 
 <h3>2. Após feito o clone do repositório, instalar:</h3>
 
-<h4>O ambiente virtual e atualizar suas dependências com o seguinte comando:</h4>
+<h4>O ambiente virtual* e atualizar suas dependências com o seguinte comando:</h4>
 
 LINUX:
 ```
@@ -79,6 +97,21 @@ WINDOWS:
 ```
 py -m venv venv --upgrade-deps
 ```
+
+Caso seja retornado algum erro semelhante a este basta seguir as instruções:
+
+```
+The virtual environment was not created successfully because ensurepip is not
+available.  On Debian/Ubuntu systems, you need to install the python3-venv
+package using the following command.
+
+    apt install python3.10-venv
+
+You may need to use sudo with that command.  After installing the python3-venv
+package, recreate your virtual environment.
+```
+
+*É interessante seguir esta prática porque diferentes projetos exigem diferentes dependências. Um ambiente virtual nada mais é do que um ambiente separado da sua máquina. Caso contrário, a máquina do usuário pode se encher de dependências que serão utilizadas apenas em um único projeto.
 
 <h4>Ative o seu ambiente virtual com o comando:</h4>
 
@@ -137,6 +170,10 @@ LINUX:
 ```
 python manage.py runserver
 ```
+ou
+```
+./manage.py runserver
+```
 
 WINDOWS:
 ```
@@ -147,9 +184,7 @@ py manage.py runserver
 
 ## Documentação
 
-Para ter acesso ao descrições detalhes das rotas e seus retornos, conferir documentação completa no link a seguir:
-
-https://kenziedoc-django-api-documentation.vercel.app/
+Para ter acesso ao descrições detalhes das rotas e seus retornos, conferir documentação completa no link [aqui](https://kenziedoc-django-api-documentation.vercel.app/).
 
 <br>
 
@@ -187,6 +222,20 @@ https://kenziedoc-django-api-documentation.vercel.app/
     <p>Kaio Iwakiri - Developer</p><a href="https://www.linkedin.com/in/kaio-iwakiri/" target="_blank" ><img src="https://img.shields.io/badge/-LinkedIn-%230077B5?style=for-the-badge&logo=linkedin&logoColor=white" target="_blank"></a> 
     <a href = "https://github.com/kaio-ti/"><img src="https://www.kindpng.com/picc/m/128-1280187_github-logo-png-github-transparent-png.png" width= 106px height=27px target="_blank"> </a>
 </div>
+
+<br>
+
+## Referências
+
+- [Django](https://www.djangoproject.com/)
+- [Django Rest Framework](https://www.django-rest-framework.org/)
+- [Generic views](https://www.django-rest-framework.org/api-guide/generic-views/)
+- [Git](https://git-scm.com/downloads)
+- [Insomnia-documenter](https://www.npmjs.com/package/insomnia-documenter)
+- [Insomnia-documenter (quick tutorial)](https://www.youtube.com/watch?v=pq2u3FqVVy8)
+- [Python](https://www.python.org/downloads/)
+- [SQLite3](https://docs.python.org/3/library/sqlite3.html)
+- [Visual Studio Code (VSCode)](https://code.visualstudio.com/)
 
 <br>
 
