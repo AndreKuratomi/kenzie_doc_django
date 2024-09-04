@@ -252,8 +252,6 @@ For full description of endpoints and its responses check the insomnia documenta
 
 <br>
 
-<br>
-
 ## References
 
 - [Django](https://www.djangoproject.com/)
