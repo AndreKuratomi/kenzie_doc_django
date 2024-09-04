@@ -33,7 +33,7 @@ It uses the language <strong>[Python](https://www.python.org/downloads/)</strong
 
 <figure>
     <img src="./kenzie_doc_django.drawio.png" alt="diagram of table relationships">
-    <figcaption style="text-align: center">Table relationshipts</figcaption>
+    <figcaption style="text-align: center">kenzie_doc_django API diagram</figcaption>
 </figure>
 
 <br>
