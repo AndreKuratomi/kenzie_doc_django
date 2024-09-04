@@ -1,4 +1,4 @@
-# kenzie_doc-django
+# kenzie_doc_django
 
 - [Translations](#translations)
 - [About](#about)
