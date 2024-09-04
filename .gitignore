@@ -1,6 +1,9 @@
 /venv
+
 db.sqlite3
 __pycache__
+
 *.vscode
 *.pyc
+
 ISSUES.txt
