@@ -9,5 +9,5 @@ class AppointmentsModel(models.Model):
     complaint = models.CharField(max_length=255, default="")
     finished = models.BooleanField(default=False)
 
-    patient = models.ManyToManyField("user.Patient", related_name="appointment")
-    professional = models.ManyToManyField("user.Professional", related_name="appointment")
+    # patient = models.ManyToManyField("user.Patient", related_name="appointment")
+    # professional = models.ManyToManyField("user.Professional", related_name="appointment")

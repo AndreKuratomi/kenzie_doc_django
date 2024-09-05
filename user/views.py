@@ -1,5 +1,5 @@
 from django.contrib.auth import authenticate
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from datetime import date, datetime, time, timedelta
 
 from rest_framework import status
@@ -10,10 +10,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authentication import authenticate
 
-from utils.functions import is_this_user_admin_or_the_user_himself, is_this_user_admin
-
-from .models import Patient, Professional, User, Admin
-from .serializers import AdminSerializer, LoginUserSerializer, PatientIdSerializer, PatientSerializer, ProfessionalSerializer
+from .models import Address, Patient, Professional, User, Admin
+from .serializers import AdminSerializer, LoginUserSerializer, PatientIdSerializer, PatientSerializer, ProfessionalSerializer, UserSerializer
 from .permissions import IsAdmin, IsJustLogged, PatientSelfOrAdminPermissions, ProfessionalSelfOrAdminPermissions
 
 import ipdb
@@ -50,33 +48,57 @@ class PatientsView(APIView):
 
     def post(self, request):
         try:
-            serializer = PatientSerializer(data=request.data)
-            data = request.data
+            serializer = UserSerializer(data=request.data.get('user', {}))
 
             if not serializer.is_valid():
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-            if Patient.objects.filter(cpf=serializer.validated_data['cpf']).exists() == True:
-                return Response({"message": "This patient already exists"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+            data = serializer.validated_data
 
-            user = User.objects.create_user(data['user']['email'], data['user']['password'])
-            patient = Patient.objects.create(
-                user=user, 
-                name=request.data['name'],
-                cpf=request.data['cpf'],
-                phone=request.data['phone'],
-                age = request.data['age'],
-                sex = request.data['sex']
-            )
+            if User.objects.filter(cpf=data['cpf']).exists():
+                return Response({"message": "This user already exists!"}, status=status.HTTP_409_CONFLICT)
 
-            if user and patient:
-                serializer = PatientSerializer(patient)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            else:
-                return Response("User or patient not created! Verify data.", status=status.HTTP_400_BAD_REQUEST)
+            with transaction.atomic():
+                address_data = data.get('address', {})
+                address = Address.objects.create(
+                    post_code=address_data['post_code'],
+                    house_number=address_data['house_number'],
+                    street=address_data.get('street', ''),
+                    city=address_data.get('city', ''),
+                    state=address_data.get('state', '')
+                )
+
+                user = User.objects.create_user(
+                    email=data['email'], 
+                    password=data['password'],
+                    name=data['name'],
+                    surname=data['surname'],
+                    cpf=data['cpf'],
+                    phone=data['phone'],
+                    age=data['age'],
+                    sex=data['sex'],
+                    address=address,
+                )
+
+                if user:
+
+                    patient = Patient.objects.create(
+                        user=user, 
+                    )
+
+                    if patient:
+
+                        serializer = PatientSerializer(patient)
+
+                        return Response(serializer.data, status=status.HTTP_201_CREATED)
+                    
+                    else:
+                        return Response("Patient not created! Verify data.", status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    return Response("User not created! Verify data.", status=status.HTTP_400_BAD_REQUEST)
         
-        except IntegrityError:
-            return Response({"message": "This patient already exists"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        except Exception as e:
+            return Response({f"message": {e}}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
     def get(self, request):
         try:
@@ -184,27 +206,57 @@ class ProfessionalsView(APIView):
     def post(self, request):
         try:
             serializer = ProfessionalSerializer(data=request.data)
-            data = request.data
 
             if not serializer.is_valid():
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-            if Professional.objects.filter(council_number=serializer.validated_data['council_number']).exists() == True:
-                return Response({"message": "This professional already exists"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+            data = serializer.validated_data
+            user_data = data['user']
 
-            user = User.objects.create_user(data['email'], data['password'], is_prof=True)
-            professional = Professional.objects.create(
-                user=user, 
-                council_number=request.data['council_number'], 
-                name=request.data['name'],
-                phone=request.data['phone'],
-                specialty=request.data['specialty'].capitalize()
+            if User.objects.filter(cpf=user_data['cpf']).exists():
+                return Response({"message": "This user already exists!"}, status=status.HTTP_409_CONFLICT)
+
+            with transaction.atomic():
+                address_data = user_data.get('address', {})
+                address = Address.objects.create(
+                    post_code=address_data['post_code'],
+                    house_number=address_data['house_number'],
+                    street=address_data.get('street', ''),
+                    city=address_data.get('city', ''),
+                    state=address_data.get('state', '')
                 )
-          
-            serializer = ProfessionalSerializer(professional)
 
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+                user = User.objects.create_user(
+                    email=user_data['email'], 
+                    password=user_data['password'],
+                    name=user_data['name'],
+                    surname=user_data['surname'],
+                    cpf=user_data['cpf'],
+                    phone=user_data['phone'],
+                    age=user_data['age'],
+                    sex=user_data['sex'],
+                    address=address,
+                    is_prof=True
+                )
 
+                if user:
+                    # ipdb.set_trace()
+                    if Professional.objects.filter(council_number=data['council_number']).exists():
+                        return Response({"message": "This professional already exists!"}, status=status.HTTP_409_CONFLICT)
+
+                    professional = Professional.objects.create(
+                        user=user, 
+                        council_number=data['council_number'], 
+                        specialty=data['specialty'].capitalize()
+                    )
+                
+                    serializer = ProfessionalSerializer(professional)
+
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+                else:
+                    return Response("User not created! Verify data.", status=status.HTTP_400_BAD_REQUEST)
+                
         except IntegrityError:
             return Response({"message": "This professional already exists"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
@@ -317,27 +369,76 @@ class ProfessionalsBySpecialtyView(APIView):
 
 class AdminView(APIView):
 
+    authentication_classes = [TokenAuthentication]
+    # permission_classes = [IsAdmin]
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            self.permission_classes = [IsAdmin]
+        
+        return super().get_permissions()
+
+
     def post(self, request):
         try:
-            serializer = AdminSerializer(data=request.data)
-            data = request.data
+            serializer = UserSerializer(data=request.data.get('user', {}))
 
             if not serializer.is_valid():
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-            user = User.objects.create_user(data['email'], data['password'], is_admin=True)
-            admin = Admin.objects.create(user=user, name=request.data['name'])
-            serializer = AdminSerializer(admin)
+            data = serializer.validated_data
 
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            if User.objects.filter(cpf=data['cpf']).exists():
+                return Response({"message": "This user already exists!"}, status=status.HTTP_409_CONFLICT)
 
-        except IntegrityError:
-            return Response({"message": "This admin already exists"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+            with transaction.atomic():
+                address_data = data.get('address', {})
+
+                address = Address.objects.create(
+                    post_code=address_data['post_code'],
+                    house_number=address_data['house_number'],
+                    street=address_data.get('street', ''),
+                    city=address_data.get('city', ''),
+                    state=address_data.get('state', '')
+                )
+                user = User.objects.create_user(
+                    email=data['email'], 
+                    password=data['password'],
+                    name=data['name'],
+                    surname=data['surname'],
+                    cpf=data['cpf'],
+                    phone=data['phone'],
+                    age=data['age'],
+                    sex=data['sex'],
+                    address=address,
+                    is_admin=True
+                )
+
+                if user:
+
+                    admin = Admin.objects.create(
+                        user=user, 
+                    )
+
+                    if admin:
+
+                        serializer = AdminSerializer(admin)
+
+                        return Response(serializer.data, status=status.HTTP_201_CREATED)
+                    
+                    else:
+                        return Response("Admin not created! Verify data.", status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    return Response("User not created! Verify data.", status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response({f"error": {e}}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+
 
     def get(self, request):
         try:
-            admin = Admin.objects.all()
-            serialized = AdminSerializer(admin, many=True)
+            admins = Admin.objects.all()
+            serialized = AdminSerializer(admins, many=True)
 
             return Response(serialized.data, status=status.HTTP_200_OK)
 
