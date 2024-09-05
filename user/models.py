@@ -32,8 +32,8 @@ class User(AbstractUser):
         ('f', 'F')
     )
     
-    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    cpf = models.CharField(primary_key=False, max_length=11)
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False) # editable=False is processed as read_only
+    cpf = models.CharField(max_length=11)
 
     is_prof = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
