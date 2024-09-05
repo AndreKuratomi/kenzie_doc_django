@@ -56,7 +56,7 @@ git init
 ```
 <br>
 
-<h3>1. Fazer o clone do reposítório <span>kenzie_doc_django</span> na sua máquina pelo terminal do computador ou pelo do IDE:</h3>
+<h3>1. Fazer o clone do reposítório <b>kenzie_doc_django</b> na sua máquina pelo terminal do computador ou pelo do IDE:</h3>
 
 ```
 git clone https://github.com/AndreKuratomi/kenzie_doc_django.git
