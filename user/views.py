@@ -11,8 +11,10 @@ from rest_framework.views import APIView
 from rest_framework.authentication import authenticate
 
 from .models import Address, Patient, Professional, User, Admin
-from .serializers import AdminSerializer, LoginUserSerializer, PatientIdSerializer, PatientSerializer, ProfessionalSerializer, UserSerializer
+from .serializers import AdminSerializer, AddressSerializer, LoginUserSerializer, PatientIdSerializer, PatientSerializer, ProfessionalSerializer, UserSerializer
 from .permissions import IsAdmin, IsJustLogged, PatientSelfOrAdminPermissions, ProfessionalSelfOrAdminPermissions
+
+from kenziedoc_project.exceptions import NotPatientError
 
 import ipdb
 
@@ -55,6 +57,7 @@ class PatientsView(APIView):
 
             data = serializer.validated_data
 
+            # ipdb.set_trace()
             if User.objects.filter(cpf=data['cpf']).exists():
                 return Response({"message": "This user already exists!"}, status=status.HTTP_409_CONFLICT)
 
@@ -126,28 +129,40 @@ class PatientByIdView(RetrieveUpdateDestroyAPIView):
 
     def get(self, request, patient_id=''):
         try:
-            patient = Patient.objects.get(cpf=patient_id)
+            user = User.objects.get(cpf=patient_id)
+
+            if user.is_prof or user.is_admin:
+                raise NotPatientError()
             
-            # grant has_object_permission is going to be read because patient was manually called:            
-            self.check_object_permissions(request, patient)
+            patient = Patient.objects.get(user=user)
+            
+            if patient:
+                # grant has_object_permission is going to be read because patient was manually called:            
+                self.check_object_permissions(request, patient)
 
-            serializer = PatientSerializer(patient)
+                serializer = PatientSerializer(patient)
 
-            return Response(serializer.data, status=status.HTTP_200_OK)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            
+            else:
+                return Response(
+                {'message': 'Patient does not exist'}, status=status.HTTP_404_NOT_FOUND,
+            )
 
-        except Patient.DoesNotExist:
+        except User.DoesNotExist:
             return Response(
                 {'message': 'Patient does not exist'}, status=status.HTTP_404_NOT_FOUND,
             )        
 
     def patch(self, request, patient_id=''):
         try:
-            patient = Patient.objects.get(cpf=patient_id)
-            user = User.objects.get(patient=patient)
+            user = User.objects.get(cpf=patient_id)
+            patient = Patient.objects.get(user=user)
+
             # grant has_object_permission is going to be read because patient was manually called:
             self.check_object_permissions(request, patient)
 
-            serialized = PatientIdSerializer(data=request.data, partial=True)
+            serialized = PatientIdSerializer(data=request.data, partial=True) #???
 
             if not serialized.is_valid():
                 return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -155,39 +170,38 @@ class PatientByIdView(RetrieveUpdateDestroyAPIView):
             data = {**serialized.validated_data}
 
             # CPF update not allowed:
-            if 'patient_id' in data:
-                if Patient.objects.filter(patient_id=request.data['patient_id']).exists() == True:
-                    response = {"message": "This patient_id already exists and it is not updatable!"}
-                    return Response(response, status=status.HTTP_422_UNPROCESSABLE_ENTITY)                   
+            if 'cpf' in data['user']:
+                response = {"message": "This cpf already exists and it is not updatable!"}
+                return Response(response, status=status.HTTP_422_UNPROCESSABLE_ENTITY)                   
                 
-            # User data update if provided:
             user_data = request.data.get("user", {})
+            address_data = user_data.pop("address", {})
+
+            # User data update if provided:
             if user_data:
                 for key, value in user_data.items():
                     setattr(user, key, value)
                 user.save()
 
-            # Patient update if provided:
-            patient_data = {key: value for key, value in serialized.validated_data.items() if key != 'user'}
-            for key, value in patient_data.items():
-                setattr(patient, key, value)
-            patient.save()
+# a62bfe0c46717812a7a12c706cf878145adcb5c8
+            # Address data update if provided:
+            if address_data:
+                address = user.address
+                for key, value in address_data.items():
+                    setattr(address, key, value)
+                address.save()
 
-            patient = Patient.objects.get(cpf=patient_id)
-            serialized = PatientSerializer(patient)
+            serialized = UserSerializer(user)
 
             return Response(serialized.data, status=status.HTTP_200_OK)        
 
         except User.DoesNotExist:
             return Response({'message': 'User does not exist'}, status=status.HTTP_404_NOT_FOUND)
-
-        except Patient.DoesNotExist:
-            return Response({'message': 'Patient does not exist'}, status=status.HTTP_404_NOT_FOUND)
     
     def delete(self, request, patient_id=''):
         try:
-            patient = Patient.objects.get(cpf=patient_id)
-            user = User.objects.get(patient=patient)
+            user = User.objects.get(cpf=patient_id)
+            patient = Patient.objects.get(user=user)
 
             patient.delete()
             user.delete()
@@ -240,7 +254,6 @@ class ProfessionalsView(APIView):
                 )
 
                 if user:
-                    # ipdb.set_trace()
                     if Professional.objects.filter(council_number=data['council_number']).exists():
                         return Response({"message": "This professional already exists!"}, status=status.HTTP_409_CONFLICT)
 
@@ -310,16 +323,25 @@ class ProfessionalsByIdView(APIView):
             
             # Council_number update not allowed:
             if 'council_number' in data:
-                if Professional.objects.filter(council_number=request.data['council_number']).exists() == True:
-                    response = {"message": "Council_number can't be updated!"}
-                    return Response(response, status=status.HTTP_422_UNPROCESSABLE_ENTITY)                   
-                
-            # User data update if provided:
+                response = {"message": "Council_number can't be updated!"}
+                return Response(response, status=status.HTTP_422_UNPROCESSABLE_ENTITY)                   
+
+            # User and address data:
             user_data = request.data.get("user", {})
+            address_data = user_data.pop("address", {})
+
+            # User data update if provided:
             if user_data:
                 for key, value in user_data.items():
                     setattr(user, key, value)
                 user.save()
+
+            # Address data update if provided:
+            if address_data:
+                address = user.address
+                for key, value in address_data.items():
+                    setattr(address, key, value)
+                address.save()
 
             # Professional update if provided:
             professional_data = {key: value for key, value in serialized.validated_data.items() if key != 'user'}
