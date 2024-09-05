@@ -7,10 +7,10 @@ import uuid
 class UsersModel(BaseUserManager):
     def create_user(self, email, password, is_prof=False, is_admin=False, **extra_fields):
         if not email:
-            raise ValueError("Email needed to creation")
+            raise ValueError("Email necessary for creation!")
 
         email = self.normalize_email(email)
-        user = self.model(email=email, is_prof=is_prof, is_admin=is_admin,  **extra_fields)
+        user = self.model(email=email, is_prof=is_prof, is_admin=is_admin, **extra_fields)
         user.set_password(password)
 
         user.save(using=self.db)
@@ -27,11 +27,25 @@ class UsersModel(BaseUserManager):
 
 
 class User(AbstractUser):
+    SEX = (
+        ('m', 'M'),
+        ('f', 'F')
+    )
+    
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    cpf = models.CharField(primary_key=False, max_length=11)
+
     is_prof = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
-    email = models.EmailField(max_length=255, unique=True)
+
+    name = models.CharField(max_length=255)
+    surname = models.CharField(max_length=255)
     username = models.CharField(unique=False, null=True, max_length=255)
+    age = models.IntegerField()
+    sex = models.CharField(max_length=1, choices=SEX)
+    email = models.EmailField(max_length=255, unique=True)
+    phone = models.CharField(max_length=11)
+    
     address = models.ForeignKey("Address", on_delete=models.CASCADE, related_name='users', null=True)
 
     USERNAME_FIELD = 'email'
@@ -47,30 +61,23 @@ class UserLogin(models.Model):
 
 class Address(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    street = models.CharField(max_length=255)
-    house_number = models.IntegerField()
-    state = models.CharField(max_length=255)
+    street = models.CharField(max_length=255, blank=True)
+    house_number = models.CharField(max_length=255)
+    post_code = models.CharField(max_length=255) # use a separate API for filling the blank ones
+    city = models.CharField(max_length=255, blank=True)
+    state = models.CharField(max_length=2, blank=True)
 
 
 class Patient(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    cpf = models.CharField(primary_key=True, max_length=11, editable=False)
-    name = models.CharField(max_length=255)
-    age = models.CharField(max_length=255)
-    sex = models.CharField(max_length=255)
-    phone = models.CharField(max_length=255)
 
 
 class Professional(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    council_number = models.CharField(primary_key=True, max_length=8, editable=False)
-    name = models.CharField(max_length=255)
-    phone = models.CharField(max_length=255)
+    council_number = models.CharField(max_length=8, unique=True)
     specialty = models.CharField(max_length=255)
-    patients = models.ManyToManyField(Patient)
 
 
 class Admin(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=255)
 
