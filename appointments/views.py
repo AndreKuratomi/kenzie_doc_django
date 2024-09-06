@@ -9,12 +9,15 @@ from rest_framework.authentication import TokenAuthentication
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.decorators import authentication_classes, permission_classes
 
-from user.views import ProfessionalsByIdView
 from .models import AppointmentsModel
 from .serializers import AllAppointmentsSerializer, AppPatientSerializer, AppProfessonalSerializer, AppointmentsSerializer, AppointmentsToUpdateSerializer
 from .permissions import AppointmentPermission
+
 from user.models import Patient, Professional, User
-from user.serializers import PatientSerializer, ProfessionalSerializer, NewPatientSerializer
+from user.serializers import PatientSerializer, ProfessionalSerializer, UserSerializer
+from user.views import ProfessionalsByIdView
+
+from kenziedoc_project.exceptions import PatientNotFoundError, UserNotFoundError, ProfessionalNotFoundError
 
 import ipdb
 
@@ -22,7 +25,7 @@ import ipdb
 class SpecificPatientView(APIView):
 
     authentication_classes = [TokenAuthentication]
-    permission_classes = [AppointmentPermission]
+    permission_classes = [AppointmentPermission] # the patient himself may see as well
 
     def get(self, request, cpf=''):
         try:
@@ -147,31 +150,37 @@ class CreateAppointment(APIView):
     permission_classes = [AppointmentPermission]
 
     def post(self, request):
+        try:
+            professional = Professional.objects.get(council_number=request.data['council_number'])
+        except Professional.DoesNotExist:
+            raise ProfessionalNotFoundError()
 
-        professional = Professional.objects.get(council_number=request.data['council_number'])
-
-        patient = Patient.objects.get(cpf=request.data['cpf']) 
-
-        data=request.data
-
-        prof = ProfessionalSerializer(professional)
-        # pat = NewPatientSerializer(patient)
-        pat = PatientSerializer(patient)
-
-        data['professional'] = prof.data["council_number"]
-        data['patient'] = pat.data["cpf"]
-
-        serializer = AppointmentsSerializer(
-            data=data
-        )
+        try:
+            user = User.objects.get(cpf=request.data['cpf']) 
+        except User.DoesNotExist:
+            raise UserNotFoundError()
         
-        # print(serializer.validated_data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            patient = Patient.objects.get(user=user)
+        except Patient.DoesNotExist:
+            raise PatientNotFoundError()
 
-        serializer.validated_data['professional'] = professional
-        serializer.validated_data['patient'] = patient
-        appointment = AppointmentsModel.objects.create(**serializer.validated_data)
-        serializer = AppointmentsSerializer(appointment)
+        try:
+            data=request.data
+            data['professional'] = professional.pk
+            data['patient'] = patient.pk
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+            serializer = AppointmentsSerializer(
+                data=data
+            )
+            
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+            appointment = AppointmentsModel.objects.create(**serializer.validated_data)
+            serializer = AppointmentsSerializer(appointment)
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response({"error": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
