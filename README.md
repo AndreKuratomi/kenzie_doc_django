@@ -55,8 +55,8 @@ It uses the language <strong>[Python](https://www.python.org/downloads/)</strong
 ```
 git init
 ```
-
 <br>
+
 <h3>1. Clone the repository <b>kenzie_doc_django</b> by your machine terminal or by the IDE's:</h3>
 
 ```

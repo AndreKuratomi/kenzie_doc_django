@@ -35,8 +35,7 @@ class UserSerializer(serializers.ModelSerializer):
         ]
 
         extra_kwargs = {
-            'password': {'write_only': True},
-            'cpf': {'write_only': True}
+            'password': {'write_only': True}
         }
 
 
