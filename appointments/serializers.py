@@ -1,37 +1,32 @@
 from rest_framework import serializers
+from .models import AppointmentsModel
 from user.models import Patient, Professional
 from user.serializers import PatientSerializer, ProfessionalSerializer
 
-
-class AppPatientSerializer(serializers.Serializer):
-    cpf = serializers.CharField()
+from datetime import datetime
 
 
-class AppProfessonalSerializer(serializers.Serializer):
-    council_number = serializers.CharField()
+date = serializers.DateTimeField( # brazilian format
+    input_formats=['%d/%m/%Y - %H:%M'],
+    format='%d/%m/%Y - %H:%M'
+)
 
 
-class AppointmentsSerializer(serializers.Serializer):
+class AppointmentsSerializer(serializers.ModelSerializer):
+    
     uuid = serializers.UUIDField(read_only=True)
-    date = serializers.DateTimeField()
     complaint = serializers.CharField()
+    date = date
     finished = serializers.BooleanField(default=False)
     patient = serializers.PrimaryKeyRelatedField(queryset=Patient.objects.all())
     professional = serializers.PrimaryKeyRelatedField(queryset=Professional.objects.all())
 
-
-class AllAppointmentsSerializer(serializers.Serializer):
-    uuid = serializers.UUIDField(read_only=True)
-    date = serializers.DateTimeField()
-    complaint = serializers.CharField()
-    finished = serializers.BooleanField()
-    patient = PatientSerializer()
-    professional = ProfessionalSerializer()
+    class Meta:
+        model = AppointmentsModel
+        fields = '__all__'
 
 
-class AppointmentsToUpdateSerializer(serializers.Serializer):
-    date = serializers.DateTimeField(required=False)
-    complaint = serializers.CharField(required=False)
-    finished = serializers.BooleanField(required=False)
-    patient = serializers.CharField()
-    professional = serializers.CharField()
+class AppointmentsToUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AppointmentsModel
+        fields = '__all__'
