@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils import timezone
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -14,7 +15,7 @@ from .permissions import AppointmentPermission, PatientSelfOrAdminPermissions, P
 from user.models import Patient, Professional, User
 
 from utils.functions import is_this_data_schedulable
-from utils.variables import date_format_regex
+from utils.variables import date_format_regex, date_format
 
 from kenziedoc_project.exceptions import PatientNotFoundError, UserNotFoundError, ProfessionalNotFoundError
 
@@ -169,17 +170,31 @@ class CreateAppointment(APIView):
             data['professional'] = professional.pk
             data['patient'] = patient.pk
 
+            date = data['date']
+            appointment_date_naive = datetime.strptime(date, date_format)
+            # Make it timezone-aware (assuming the default timezone)
+            appointment_date = timezone.make_aware(appointment_date_naive)
+
             # Is data['date'] in the right format?:
-            if not re.match(date_format_regex, data['date']):
+            if not re.match(date_format_regex, date):
                 return Response({"error": "Date not in format 'dd/mm/yyyy - hh:mm'. Check date typed!"}, status=status.HTTP_400_BAD_REQUEST)
             
             # No appointments in the past...:
-            if not is_this_data_schedulable(str(data['date'])):
+            if not is_this_data_schedulable(str(date)):
                 return Response({"error": "A appointment cannot be scheduled in the past. Check date typed!"}, status=status.HTTP_400_BAD_REQUEST)
+            # ipdb.set_trace()
 
             # Do we already have an appointment for this doctor at this hour?:
+            date_appointments_for_prof = AppointmentsModel.objects.filter(professional=professional, date=appointment_date).exists()
+
+            if date_appointments_for_prof:
+                return Response({"error": "This professional already has an appointment for this period!"}, status=status.HTTP_409_CONFLICT)
 
             # Is the patient already scheduled for another professional at this period?:
+            date_appointments_for_pat = AppointmentsModel.objects.filter(patient=patient, date=appointment_date).exists()
+
+            if date_appointments_for_pat:
+                return Response({"error": "This patient already has an appointment for this period!"}, status=status.HTTP_409_CONFLICT)
 
 
             serializer = AppointmentsSerializer(
