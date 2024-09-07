@@ -1,8 +1,9 @@
 from rest_framework import serializers
 
+from .models import MailModel
 
-class EmailSerializer(serializers.Serializer):
-    subject=serializers.CharField()
-    message=serializers.CharField()
-    sender=serializers.EmailField()
-    receiver=serializers.ListField()
+
+class EmailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MailModel
+        fields = "__all__"

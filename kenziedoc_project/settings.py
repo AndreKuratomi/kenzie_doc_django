@@ -14,6 +14,8 @@ import dj_database_url
 
 from pathlib import Path
 
+from utils.envs import django_secret, user_email, password
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -22,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-6s@z@@40(&j)964(!i5e6d9+8uomonh6@0r9*^1j4b0ti&m!1f"
+SECRET_KEY = django_secret
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -138,8 +140,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 EMAIL_BACKEND="django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST="smtp.gmail.com"
-EMAIL_HOST_USER="kenziedoc_project.app@gmail.com"
-EMAIL_HOST_PASSWORD="123456@Az"
+EMAIL_HOST_USER=user_email
+EMAIL_HOST_PASSWORD=password
 EMAIL_USE_TLS=True
 EMAIL_USE_SSL=False
 EMAIL_PORT=587
