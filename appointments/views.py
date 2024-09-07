@@ -130,10 +130,9 @@ class NotFinishedAppointmentsView(APIView):
 
     def get(self, request):
         try:
-            not_finished_appointment = AppointmentsModel.objects.filter(finished=False)
+            not_finished_appointments = AppointmentsModel.objects.filter(finished=False)
 
-            for unfinished in not_finished_appointment:
-                serializer = AppointmentsSerializer(unfinished)
+            serializer = AppointmentsSerializer(not_finished_appointments, many=True)
 
             return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -170,13 +169,18 @@ class CreateAppointment(APIView):
             data['professional'] = professional.pk
             data['patient'] = patient.pk
 
-            # Is data['date'] in the right format?
+            # Is data['date'] in the right format?:
             if not re.match(date_format_regex, data['date']):
                 return Response({"error": "Date not in format 'dd/mm/yyyy - hh:mm'. Check date typed!"}, status=status.HTTP_400_BAD_REQUEST)
             
-            # No appointments in the past...
+            # No appointments in the past...:
             if not is_this_data_schedulable(str(data['date'])):
                 return Response({"error": "A appointment cannot be scheduled in the past. Check date typed!"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Do we already have an appointment for this doctor at this hour?:
+
+            # Is the patient already scheduled for another professional at this period?:
+
 
             serializer = AppointmentsSerializer(
                 data=data
