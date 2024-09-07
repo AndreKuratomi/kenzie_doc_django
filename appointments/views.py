@@ -11,7 +11,7 @@ from rest_framework.decorators import authentication_classes, permission_classes
 
 from .models import AppointmentsModel
 from .serializers import AllAppointmentsSerializer, AppPatientSerializer, AppProfessonalSerializer, AppointmentsSerializer, AppointmentsToUpdateSerializer
-from .permissions import AppointmentPermission
+from .permissions import AppointmentPermission, PatientSelfOrAdminPermissions, ProfessionalSelfOrAdminPermissions
 
 from user.models import Patient, Professional, User
 from user.serializers import PatientSerializer, ProfessionalSerializer, UserSerializer
@@ -25,16 +25,18 @@ import ipdb
 class SpecificPatientView(APIView):
 
     authentication_classes = [TokenAuthentication]
-    permission_classes = [AppointmentPermission] # the patient himself may see as well
+    permission_classes = [PatientSelfOrAdminPermissions]
 
     def get(self, request, cpf=''):
         try:
-            patient = Patient.objects.get(cpf=cpf)
+            user = User.objects.get(cpf=cpf)
+            patient = Patient.objects.get(user=user)
 
             if patient:
-                appointment = AppointmentsModel.objects.filter(patient=patient)
-                serializer = AppointmentsSerializer(appointment, many=True)
+                appointments = AppointmentsModel.objects.filter(patient=patient)
+                self.check_object_permissions(request, patient)
 
+                serializer = AppointmentsSerializer(appointments, many=True)
                 return Response(serializer.data, status=status.HTTP_200_OK)
 
         except Patient.DoesNotExist:
@@ -44,19 +46,18 @@ class SpecificPatientView(APIView):
 
 
 class SpecificProfessionalView(APIView):
-    print('***')
     authentication_classes = [TokenAuthentication]
-    permission_classes = [AppointmentPermission]
+    permission_classes = [ProfessionalSelfOrAdminPermissions]
 
     def get(self, request, council_number=''):
         try:
             professional = Professional.objects.get(council_number=council_number)
 
             if professional:
-                appointment = AppointmentsModel.objects.filter(professional=professional)
+                appointments = AppointmentsModel.objects.filter(professional=professional)
+                self.check_object_permissions(request, professional)
 
-                serializer = AppointmentsSerializer(appointment, many=True)
-
+                serializer = AppointmentsSerializer(appointments, many=True)
                 return Response(serializer.data, status=status.HTTP_200_OK)
 
         except Professional.DoesNotExist:
