@@ -1,24 +1,24 @@
 from datetime import datetime
+
 from django.core.exceptions import ObjectDoesNotExist
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-# from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
-from django.core.exceptions import ObjectDoesNotExist
-from rest_framework.decorators import authentication_classes, permission_classes
 
 from .models import AppointmentsModel
-from .serializers import AllAppointmentsSerializer, AppPatientSerializer, AppProfessonalSerializer, AppointmentsSerializer, AppointmentsToUpdateSerializer
+from .serializers import AppointmentsSerializer, AppointmentsToUpdateSerializer
 from .permissions import AppointmentPermission, PatientSelfOrAdminPermissions, ProfessionalSelfOrAdminPermissions
 
 from user.models import Patient, Professional, User
-from user.serializers import PatientSerializer, ProfessionalSerializer, UserSerializer
-from user.views import ProfessionalsByIdView
+
+from utils.functions import is_this_data_schedulable
+from utils.variables import date_format_regex
 
 from kenziedoc_project.exceptions import PatientNotFoundError, UserNotFoundError, ProfessionalNotFoundError
 
+import re
 import ipdb
 
 
@@ -169,6 +169,14 @@ class CreateAppointment(APIView):
             data=request.data
             data['professional'] = professional.pk
             data['patient'] = patient.pk
+
+            # Is data['date'] in the right format?
+            if not re.match(date_format_regex, data['date']):
+                return Response({"error": "Date not in format 'dd/mm/yyyy - hh:mm'. Check date typed!"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # No appointments in the past...
+            if not is_this_data_schedulable(str(data['date'])):
+                return Response({"error": "A appointment cannot be scheduled in the past. Check date typed!"}, status=status.HTTP_400_BAD_REQUEST)
 
             serializer = AppointmentsSerializer(
                 data=data
