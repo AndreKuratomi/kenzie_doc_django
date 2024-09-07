@@ -123,14 +123,13 @@ class SpecificAppointmentView(APIView):
             return Response({'message': 'Appointment does not exist'}, status=status.HTTP_404_NOT_FOUND)
 
 
-class NotFinishedAppointmentView(APIView):
+class NotFinishedAppointmentsView(APIView):
 
     authentication_classes = [TokenAuthentication]
     permission_classes = [AppointmentPermission]
 
     def get(self, request):
         try:
-
             not_finished_appointment = AppointmentsModel.objects.filter(finished=False)
 
             for unfinished in not_finished_appointment:
