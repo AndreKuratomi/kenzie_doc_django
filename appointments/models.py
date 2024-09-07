@@ -9,5 +9,8 @@ class AppointmentsModel(models.Model):
     complaint = models.CharField(max_length=255, default="")
     finished = models.BooleanField(default=False)
 
-    # patient = models.ManyToManyField("user.Patient", related_name="appointment")
-    # professional = models.ManyToManyField("user.Professional", related_name="appointment")
+    # Multiple appointments over time for multiple patients and professionals, 
+    # but each appointment has one professional and one patient.
+
+    patient = models.ForeignKey("user.Patient", on_delete=models.CASCADE, related_name="appointments")
+    professional = models.ForeignKey("user.Professional", on_delete=models.CASCADE, related_name="appointments")
