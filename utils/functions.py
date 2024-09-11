@@ -1,8 +1,22 @@
-from .variables import brazilian_time_parsed, date_format
+import random
+import string
 
 from datetime import datetime
+
+from .variables import brazilian_time_parsed, date_format
+
+
 
 def is_this_data_schedulable(date: str) -> bool:
     parsed_date = datetime.strptime(date, date_format)
 
     return parsed_date > brazilian_time_parsed
+
+
+def generate_register_number() -> str:
+    """Public Id for patients after registration in substitution to CPF."""
+    first_part = ''.join(random.choices(string.ascii_letters + string.digits, k=6))
+    second_part = random.choice(string.ascii_letters + string.digits)
+    register_number = f'{first_part}-{second_part}'
+
+    return register_number
