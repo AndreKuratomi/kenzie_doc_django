@@ -13,7 +13,7 @@
 ## Traduções
 
 - [English / Inglês](https://github.com/AndreKuratomi/kenzie_doc_django)
-- [Português brasileiro / Brazilian portuguese](/.multilingual_readmes/README.pt-br.md)
+- [Português brasileiro / Brazilian portuguese](./README.pt-br.md)
 
 <br>
 
