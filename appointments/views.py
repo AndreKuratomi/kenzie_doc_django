@@ -31,10 +31,10 @@ class SpecificPatientView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [PatientSelfOrAdminPermissions]
 
-    def get(self, request, cpf=''):
+    def get(self, request, register_number=''):
         try:
-            user = User.objects.get(cpf=cpf)
-            patient = Patient.objects.get(user=user)
+            patient = Patient.objects.get(register_number=register_number)
+            user = User.objects.get(patient=patient)
 
             if patient:
                 appointments = AppointmentsModel.objects.filter(patient=patient)
@@ -166,14 +166,14 @@ class CreateAppointment(APIView):
             raise ProfessionalNotFoundError()
 
         try:
-            user = User.objects.get(cpf=request.data['cpf']) 
-        except User.DoesNotExist:
-            raise UserNotFoundError()
-        
-        try:
-            patient = Patient.objects.get(user=user)
+            patient = Patient.objects.get(register_number=request.data['patient_register_number'])
         except Patient.DoesNotExist:
             raise PatientNotFoundError()
+
+        try:
+            user = User.objects.get(patient=patient)
+        except User.DoesNotExist:
+            raise UserNotFoundError()
 
         try:
             data=request.data
@@ -188,7 +188,7 @@ class CreateAppointment(APIView):
             # Is data['date'] in the right format?:
             if not re.match(date_format_regex, date):
                 return Response({"error": "Date not in format 'dd/mm/yyyy - hh:mm'. Check date typed!"}, status=status.HTTP_400_BAD_REQUEST)
-            
+
             # No appointments in the past...:
             if not is_this_data_schedulable(str(date)):
                 return Response({"error": "A appointment cannot be scheduled in the past. Check date typed!"}, status=status.HTTP_400_BAD_REQUEST)
@@ -217,8 +217,8 @@ class CreateAppointment(APIView):
             appointment = AppointmentsModel.objects.create(**serializer.validated_data)
             serializer = AppointmentsSerializer(appointment)
 
-            send_appointment_confirmation_email(appointment, professional, patient)
-            send_appointment_confirmation_whatsapp(appointment, professional, patient)
+            # send_appointment_confirmation_email(appointment, professional, patient)
+            # send_appointment_confirmation_whatsapp(appointment, professional, patient)
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
