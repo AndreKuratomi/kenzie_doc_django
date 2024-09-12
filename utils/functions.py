@@ -2,9 +2,11 @@ import random
 import string
 
 from datetime import datetime
+from django.utils import timezone
 
 from .variables import brazilian_time_parsed, date_format
 
+import ipdb
 
 
 def is_this_data_schedulable(date: str) -> bool:
@@ -21,3 +23,10 @@ def generate_register_number() -> str:
     register_number = f'{first_part}-{second_part}'
 
     return register_number
+
+
+def appointment_date_convertion(date: datetime) -> datetime:
+    """Converts appointment date to brazilian format '%d/%m/%Y - %H:%M'"""
+    appointment_date = date.strftime(date_format)
+
+    return appointment_date

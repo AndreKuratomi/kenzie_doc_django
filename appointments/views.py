@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import transaction
 from django.utils import timezone
 
 from rest_framework.views import APIView
@@ -102,16 +103,22 @@ class SpecificAppointmentView(APIView):
 
                     for key, value in data.items():
                         appointment.__dict__[key] = value
+                    
+                    with transaction.atomic():
 
-                    appointment.save()
+                        appointment.save()
 
-                    updated_appointment = AppointmentsModel.objects.get(uuid=appointment_id)
-                    serialized = AppointmentsSerializer(updated_appointment)
+                        updated_appointment = AppointmentsModel.objects.get(uuid=appointment_id)
+                        serialized = AppointmentsSerializer(updated_appointment)
 
-                    # send_appointment_edition_email(appointment, professional, patient)
-                    # send_appointment_edition_whatsapp(appointment, professional, patient)
+                        professional = updated_appointment.professional
+                        # professional = Professional.objects.get(council_number=)
+                        patient = updated_appointment.patient
 
-                    return Response(serialized.data, status=status.HTTP_200_OK)
+                        send_appointment_edition_email(appointment, professional, patient)
+                        # send_appointment_edition_whatsapp(appointment, professional, patient)
+
+                        return Response(serialized.data, status=status.HTTP_200_OK)
 
         except AppointmentsModel.DoesNotExist:
             return Response({'message': 'Appointment does not exist'}, status=status.HTTP_404_NOT_FOUND)
@@ -214,13 +221,15 @@ class CreateAppointment(APIView):
             if not serializer.is_valid():
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-            appointment = AppointmentsModel.objects.create(**serializer.validated_data)
-            serializer = AppointmentsSerializer(appointment)
+            with transaction.atomic():
+                appointment = AppointmentsModel.objects.create(**serializer.validated_data)
 
-            # send_appointment_confirmation_email(appointment, professional, patient)
-            # send_appointment_confirmation_whatsapp(appointment, professional, patient)
+                send_appointment_confirmation_email(appointment, professional, patient)
+                # send_appointment_confirmation_whatsapp(appointment, professional, patient)
 
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+                serializer = AppointmentsSerializer(appointment)
+
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         except Exception as e:
             return Response({"error": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
