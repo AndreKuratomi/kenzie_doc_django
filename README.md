@@ -23,7 +23,7 @@
 
 <p>The API <b>kenzie_doc_django</b> was made for a clinic logistic. It makes CRUD operations for patients, physicians and secretaries (admins), creates and manages appointments in a simple and intuitive way, as well as manages the waiting queue of the day.
 
-This API also provides  aplicação também possibilita ao paciente fazer uma busca pelo profissional mais adequado para sua necessidade e agendar a consulta de forma confortável, prática e rápida.
+This API also gives the user the possibility to look for professionals by its specialty and also to schedule appointments with the professional chosen in a very simple way.
 
 It uses the language <strong>[Python](https://www.python.org/downloads/)</strong>, its framework <strong>[Django](https://www.djangoproject.com/)</strong> and the database <strong>[SQLite3](https://docs.python.org/3/library/sqlite3.html)</strong>.</p>
 
