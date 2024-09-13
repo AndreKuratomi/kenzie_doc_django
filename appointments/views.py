@@ -17,7 +17,7 @@ from .permissions import AppointmentPermission, PatientSelfOrAdminPermissions, P
 from user.models import Patient, Professional, User
 
 from utils.email_functions import send_appointment_cancel_email, send_appointment_confirmation_email, send_appointment_edition_email, send_appointment_finished_email
-from utils.whatsapp_func import send_appointment_confirmation_whatsapp, send_appointment_edition_whatsapp, send_appointment_cancel_whatsapp
+from utils.whatsapp_functions import send_appointment_confirmation_whatsapp, send_appointment_edition_whatsapp, send_appointment_cancel_whatsapp
 from utils.functions import is_this_data_schedulable
 from utils.variables import date_format_regex, date_format
 
@@ -142,7 +142,7 @@ class SpecificAppointmentView(APIView):
                         patient = updated_appointment.patient
 
                         send_appointment_edition_email(appointment, professional, patient, updated_fields)
-                        # send_appointment_edition_whatsapp(appointment, professional, patient)
+                        send_appointment_edition_whatsapp(appointment, professional, patient, updated_fields)
 
                         return Response(update_serialized.data, status=status.HTTP_200_OK)
 
@@ -163,8 +163,7 @@ class SpecificAppointmentView(APIView):
                     patient = appointment.patient
 
                     send_appointment_cancel_email(appointment, professional, patient)
-                    # send_appointment_cancel_whatsapp(appointment, professional, patient)
-
+                    send_appointment_cancel_whatsapp(appointment, professional, patient)
 
                     return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -212,7 +211,7 @@ class FinishAppointmentView(APIView):
                 patient = appointment.patient
 
                 send_appointment_finished_email(appointment, professional, patient)
-                # send_appointment_cancel_whatsapp(appointment, professional, patient)
+                send_appointment_cancel_whatsapp(appointment, professional, patient)
 
                 return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -283,7 +282,7 @@ class CreateAppointment(APIView):
                 appointment = AppointmentsModel.objects.create(**serializer.validated_data)
 
                 send_appointment_confirmation_email(appointment, professional, patient)
-                # send_appointment_confirmation_whatsapp(appointment, professional, patient)
+                send_appointment_confirmation_whatsapp(appointment, professional, patient)
 
                 serializer = AppointmentsSerializer(appointment)
 

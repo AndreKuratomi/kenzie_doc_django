@@ -48,7 +48,7 @@ class User(AbstractUser):
     age = models.IntegerField()
     sex = models.CharField(max_length=1, choices=SEX)
     email = models.EmailField(max_length=255, unique=True)
-    phone = models.CharField(max_length=11)
+    phone = models.CharField(max_length=14)
     
     address = models.ForeignKey("Address", on_delete=models.CASCADE, related_name='users', null=True)
 
