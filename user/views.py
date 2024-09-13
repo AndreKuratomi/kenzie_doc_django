@@ -128,13 +128,8 @@ class PatientByIdView(RetrieveUpdateDestroyAPIView):
     lookup_url_kwarg = "patient_id"
 
     def get(self, request, patient_id=''):
-        try:
-            user = User.objects.get(cpf=patient_id)
-
-            if user.is_prof or user.is_admin:
-                raise NotPatientError()
-            
-            patient = Patient.objects.get(user=user)
+        try:            
+            patient = Patient.objects.get(register_number=patient_id)
             
             if patient:
                 # grant has_object_permission is going to be read because patient was manually called:            
@@ -149,15 +144,15 @@ class PatientByIdView(RetrieveUpdateDestroyAPIView):
                 {'message': 'Patient does not exist'}, status=status.HTTP_404_NOT_FOUND,
             )
 
-        except User.DoesNotExist:
+        except Patient.DoesNotExist:
             return Response(
-                {'message': 'Patient does not exist'}, status=status.HTTP_404_NOT_FOUND,
+                {'message': 'Patient does not exist!'}, status=status.HTTP_404_NOT_FOUND,
             )        
 
     def patch(self, request, patient_id=''):
         try:
-            user = User.objects.get(cpf=patient_id)
-            patient = Patient.objects.get(user=user)
+            patient = Patient.objects.get(register_number=patient_id)
+            user = User.objects.get(patient=patient)
 
             # grant has_object_permission is going to be read because patient was manually called:
             self.check_object_permissions(request, patient)
@@ -200,8 +195,8 @@ class PatientByIdView(RetrieveUpdateDestroyAPIView):
     
     def delete(self, request, patient_id=''):
         try:
-            user = User.objects.get(cpf=patient_id)
-            patient = Patient.objects.get(user=user)
+            patient = Patient.objects.get(register_number=patient_id)
+            user = User.objects.get(patient=patient)
 
             patient.delete()
             user.delete()
@@ -292,7 +287,7 @@ class ProfessionalsByIdView(APIView):
         if self.request.method == 'DELETE':
             self.permission_classes = [IsAdmin]
         elif self.request.method == 'GET':
-            self.permission_classes = [IsJustLogged]
+            self.permission_classes = [IsJustLogged] # a professional council number is public. So anyome can check it out.
         else:
             self.permission_classes = [ProfessionalSelfOrAdminPermissions]
         

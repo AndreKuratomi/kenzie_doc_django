@@ -1,6 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import BaseUserManager
+from django.core.validators import RegexValidator
+
+from utils.functions import generate_register_number
+
 import uuid
 
 
@@ -70,6 +74,17 @@ class Address(models.Model):
 
 class Patient(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    register_number = models.CharField(
+        max_length=8,
+        unique=True,
+        default=generate_register_number,
+        validators=[
+            RegexValidator(
+                regex=r'^[a-zA-Z0-9]{6}-[a-zA-Z0-9]{1}$',
+                message='Register number must be in the format dddddd-d where d is an alphanumeric character.'
+            )
+        ]
+    )
 
 
 class Professional(models.Model):

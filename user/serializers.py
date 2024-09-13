@@ -57,7 +57,10 @@ class PatientIdSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Patient
-        fields = "__all__"
+        fields = [
+            "user",
+            "register_number"
+        ]
 
 
 class ProfessionalSerializer(serializers.ModelSerializer):

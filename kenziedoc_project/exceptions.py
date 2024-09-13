@@ -24,7 +24,7 @@ class UserNotFoundError(APIException):
 
 class PatientNotFoundError(APIException):
     status_code = '404'
-    default_detail = {"message": ["No user found for this CPF!"]}
+    default_detail = {"message": ["No user found for this register_number!"]}
     default_code = "not_found"
 
 

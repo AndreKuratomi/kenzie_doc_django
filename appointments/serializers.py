@@ -27,6 +27,8 @@ class AppointmentsSerializer(serializers.ModelSerializer):
 
 
 class AppointmentsToUpdateSerializer(serializers.ModelSerializer):
+    date = date
+    
     class Meta:
         model = AppointmentsModel
         fields = '__all__'

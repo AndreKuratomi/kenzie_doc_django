@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import transaction
 from django.utils import timezone
 
 from rest_framework.views import APIView
@@ -8,12 +9,15 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 
+
 from .models import AppointmentsModel
 from .serializers import AppointmentsSerializer, AppointmentsToUpdateSerializer
 from .permissions import AppointmentPermission, PatientSelfOrAdminPermissions, ProfessionalSelfOrAdminPermissions
 
 from user.models import Patient, Professional, User
 
+from utils.email_functions import send_appointment_cancel_email, send_appointment_confirmation_email, send_appointment_edition_email, send_appointment_finished_email
+from utils.whatsapp_func import send_appointment_confirmation_whatsapp, send_appointment_edition_whatsapp, send_appointment_cancel_whatsapp
 from utils.functions import is_this_data_schedulable
 from utils.variables import date_format_regex, date_format
 
@@ -28,10 +32,10 @@ class SpecificPatientView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [PatientSelfOrAdminPermissions]
 
-    def get(self, request, cpf=''):
+    def get(self, request, register_number=''):
         try:
-            user = User.objects.get(cpf=cpf)
-            patient = Patient.objects.get(user=user)
+            patient = Patient.objects.get(register_number=register_number)
+            user = User.objects.get(patient=patient)
 
             if patient:
                 appointments = AppointmentsModel.objects.filter(patient=patient)
@@ -90,22 +94,41 @@ class SpecificAppointmentView(APIView):
     def patch(self, request, appointment_id=''):
         try:
             appointment = AppointmentsModel.objects.get(uuid=appointment_id)
-            # user = User.objects.get(professional=professional)
+
             if appointment:
+
                 serialized = AppointmentsToUpdateSerializer(data=request.data, partial=True)
 
                 if serialized.is_valid():
                     data = {**serialized.validated_data}
 
+                    updated_fields = {}
                     for key, value in data.items():
-                        appointment.__dict__[key] = value
 
-                    appointment.save()
+                        current_value = getattr(appointment, key)
 
-                    updated_appointment = AppointmentsModel.objects.get(uuid=appointment_id)
-                    serialized = AppointmentsSerializer(updated_appointment)
+                        if current_value != value:
+                            updated_fields[key] = {'before': current_value, 'after': value}
+                            setattr(appointment, key, value)
+                    
+                    with transaction.atomic():
 
-                    return Response(serialized.data, status=status.HTTP_200_OK)
+                        appointment.save()
+
+                        updated_appointment = AppointmentsModel.objects.get(uuid=appointment_id)
+                        update_serialized = AppointmentsSerializer(updated_appointment)
+
+                        professional = updated_appointment.professional
+                        patient = updated_appointment.patient
+
+                        # If 'finished' in data return error:
+                        if 'finished' in data:
+                            return Response({"error": "field 'finished' cannot be updated here. Consider other endpoint."}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+                        send_appointment_edition_email(appointment, professional, patient, updated_fields)
+                        # send_appointment_edition_whatsapp(appointment, professional, patient)
+
+                        return Response(update_serialized.data, status=status.HTTP_200_OK)
 
         except AppointmentsModel.DoesNotExist:
             return Response({'message': 'Appointment does not exist'}, status=status.HTTP_404_NOT_FOUND)
@@ -116,9 +139,18 @@ class SpecificAppointmentView(APIView):
 
             if appointment:
 
-                appointment.delete()
+                with transaction.atomic():
 
-                return Response(status=status.HTTP_204_NO_CONTENT)
+                    appointment.delete()
+
+                    professional = appointment.professional
+                    patient = appointment.patient
+
+                    send_appointment_cancel_email(appointment, professional, patient)
+                    # send_appointment_cancel_whatsapp(appointment, professional, patient)
+
+
+                    return Response(status=status.HTTP_204_NO_CONTENT)
 
         except AppointmentsModel.DoesNotExist:
             return Response({'message': 'Appointment does not exist'}, status=status.HTTP_404_NOT_FOUND)
@@ -144,6 +176,34 @@ class NotFinishedAppointmentsView(APIView):
             )
 
 
+class FinishAppointmentView(APIView):
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [AppointmentPermission]
+
+    def patch(self, request, appointment_id=''):
+        try:
+            appointment = AppointmentsModel.objects.get(uuid=appointment_id)
+
+            if appointment:
+                if appointment.finished == True:
+                    return Response({'message': 'This appointment is already finished!'}, status=status.HTTP_400_BAD_REQUEST)
+
+                appointment.finished = True
+                appointment.save()
+
+                professional = appointment.professional
+                patient = appointment.patient
+
+                send_appointment_finished_email(appointment, professional, patient)
+                # send_appointment_cancel_whatsapp(appointment, professional, patient)
+
+                return Response(status=status.HTTP_204_NO_CONTENT)
+
+        except AppointmentsModel.DoesNotExist:
+            return Response({'message': 'Appointment does not exist'}, status=status.HTTP_404_NOT_FOUND)
+
+
 class CreateAppointment(APIView):
 
     authentication_classes = [TokenAuthentication]
@@ -156,14 +216,14 @@ class CreateAppointment(APIView):
             raise ProfessionalNotFoundError()
 
         try:
-            user = User.objects.get(cpf=request.data['cpf']) 
-        except User.DoesNotExist:
-            raise UserNotFoundError()
-        
-        try:
-            patient = Patient.objects.get(user=user)
+            patient = Patient.objects.get(register_number=request.data['patient_register_number'])
         except Patient.DoesNotExist:
             raise PatientNotFoundError()
+
+        try:
+            user = User.objects.get(patient=patient)
+        except User.DoesNotExist:
+            raise UserNotFoundError()
 
         try:
             data=request.data
@@ -178,7 +238,7 @@ class CreateAppointment(APIView):
             # Is data['date'] in the right format?:
             if not re.match(date_format_regex, date):
                 return Response({"error": "Date not in format 'dd/mm/yyyy - hh:mm'. Check date typed!"}, status=status.HTTP_400_BAD_REQUEST)
-            
+
             # No appointments in the past...:
             if not is_this_data_schedulable(str(date)):
                 return Response({"error": "A appointment cannot be scheduled in the past. Check date typed!"}, status=status.HTTP_400_BAD_REQUEST)
@@ -204,10 +264,15 @@ class CreateAppointment(APIView):
             if not serializer.is_valid():
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-            appointment = AppointmentsModel.objects.create(**serializer.validated_data)
-            serializer = AppointmentsSerializer(appointment)
+            with transaction.atomic():
+                appointment = AppointmentsModel.objects.create(**serializer.validated_data)
 
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+                send_appointment_confirmation_email(appointment, professional, patient)
+                # send_appointment_confirmation_whatsapp(appointment, professional, patient)
+
+                serializer = AppointmentsSerializer(appointment)
+
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         except Exception as e:
             return Response({"error": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
