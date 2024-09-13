@@ -25,6 +25,8 @@
 
 This API also gives the user the possibility to look for professionals by its specialty and also to schedule appointments with the professional chosen in a very simple way.
 
+After the appointment is scheduled, an email is automatically sent for both patient and professional. They are also warned by email if the appointment is updated, finished or canceled.
+
 It uses the language <strong>[Python](https://www.python.org/downloads/)</strong>, its framework <strong>[Django](https://www.djangoproject.com/)</strong> and the database <strong>[SQLite3](https://docs.python.org/3/library/sqlite3.html)</strong>.</p>
 
 <br>
