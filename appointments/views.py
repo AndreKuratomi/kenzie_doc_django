@@ -16,7 +16,7 @@ from .permissions import AppointmentPermission, PatientSelfOrAdminPermissions, P
 
 from user.models import Patient, Professional, User
 
-from utils.email_functions import send_appointment_cancel_email, send_appointment_confirmation_email, send_appointment_edition_email
+from utils.email_functions import send_appointment_cancel_email, send_appointment_confirmation_email, send_appointment_edition_email, send_appointment_finished_email
 from utils.whatsapp_func import send_appointment_confirmation_whatsapp, send_appointment_edition_whatsapp, send_appointment_cancel_whatsapp
 from utils.functions import is_this_data_schedulable
 from utils.variables import date_format_regex, date_format
@@ -94,31 +94,41 @@ class SpecificAppointmentView(APIView):
     def patch(self, request, appointment_id=''):
         try:
             appointment = AppointmentsModel.objects.get(uuid=appointment_id)
-            # user = User.objects.get(professional=professional)
+
             if appointment:
+
                 serialized = AppointmentsToUpdateSerializer(data=request.data, partial=True)
 
                 if serialized.is_valid():
                     data = {**serialized.validated_data}
 
+                    updated_fields = {}
                     for key, value in data.items():
-                        appointment.__dict__[key] = value
+
+                        current_value = getattr(appointment, key)
+
+                        if current_value != value:
+                            updated_fields[key] = {'before': current_value, 'after': value}
+                            setattr(appointment, key, value)
                     
                     with transaction.atomic():
 
                         appointment.save()
 
                         updated_appointment = AppointmentsModel.objects.get(uuid=appointment_id)
-                        serialized = AppointmentsSerializer(updated_appointment)
+                        update_serialized = AppointmentsSerializer(updated_appointment)
 
                         professional = updated_appointment.professional
-                        # professional = Professional.objects.get(council_number=)
                         patient = updated_appointment.patient
 
-                        send_appointment_edition_email(appointment, professional, patient)
+                        # If 'finished' in data return error:
+                        if 'finished' in data:
+                            return Response({"error": "field 'finished' cannot be updated here. Consider other endpoint."}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+                        send_appointment_edition_email(appointment, professional, patient, updated_fields)
                         # send_appointment_edition_whatsapp(appointment, professional, patient)
 
-                        return Response(serialized.data, status=status.HTTP_200_OK)
+                        return Response(update_serialized.data, status=status.HTTP_200_OK)
 
         except AppointmentsModel.DoesNotExist:
             return Response({'message': 'Appointment does not exist'}, status=status.HTTP_404_NOT_FOUND)
@@ -129,13 +139,18 @@ class SpecificAppointmentView(APIView):
 
             if appointment:
 
-                appointment.delete()
+                with transaction.atomic():
 
-                # send_appointment_cancel_email(appointment, professional, patient)
-                # send_appointment_cancel_whatsapp(appointment, professional, patient)
+                    appointment.delete()
+
+                    professional = appointment.professional
+                    patient = appointment.patient
+
+                    send_appointment_cancel_email(appointment, professional, patient)
+                    # send_appointment_cancel_whatsapp(appointment, professional, patient)
 
 
-                return Response(status=status.HTTP_204_NO_CONTENT)
+                    return Response(status=status.HTTP_204_NO_CONTENT)
 
         except AppointmentsModel.DoesNotExist:
             return Response({'message': 'Appointment does not exist'}, status=status.HTTP_404_NOT_FOUND)
@@ -159,6 +174,34 @@ class NotFinishedAppointmentsView(APIView):
                 {"message": "Professional not registered"},
                 status=status.HTTP_404_NOT_FOUND,
             )
+
+
+class FinishAppointmentView(APIView):
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [AppointmentPermission]
+
+    def patch(self, request, appointment_id=''):
+        try:
+            appointment = AppointmentsModel.objects.get(uuid=appointment_id)
+
+            if appointment:
+                if appointment.finished == True:
+                    return Response({'message': 'This appointment is already finished!'}, status=status.HTTP_400_BAD_REQUEST)
+
+                appointment.finished = True
+                appointment.save()
+
+                professional = appointment.professional
+                patient = appointment.patient
+
+                send_appointment_finished_email(appointment, professional, patient)
+                # send_appointment_cancel_whatsapp(appointment, professional, patient)
+
+                return Response(status=status.HTTP_204_NO_CONTENT)
+
+        except AppointmentsModel.DoesNotExist:
+            return Response({'message': 'Appointment does not exist'}, status=status.HTTP_404_NOT_FOUND)
 
 
 class CreateAppointment(APIView):
