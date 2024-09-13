@@ -97,11 +97,31 @@ class SpecificAppointmentView(APIView):
 
             if appointment:
 
+                professional = appointment.professional
+                patient = appointment.patient
+
                 serialized = AppointmentsToUpdateSerializer(data=request.data, partial=True)
 
                 if serialized.is_valid():
                     data = {**serialized.validated_data}
 
+                    # If 'finished' in data return error:
+                    if 'finished' in data:
+                        return Response({"error": "Field 'finished' cannot be updated here. Consider 'appointment_finish/' endpoint."}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+                    if 'date' in data:
+                        # Do we already have an appointment for this doctor at this period?:
+                        date_appointments_for_prof = AppointmentsModel.objects.filter(professional=professional, date=data['date']).exists()
+
+                        if date_appointments_for_prof:
+                            return Response({"error": "This professional already has an appointment for this period!"}, status=status.HTTP_409_CONFLICT)
+
+                        # Is the patient already scheduled for another professional at this period?:
+                        date_appointments_for_pat = AppointmentsModel.objects.filter(patient=patient, date=data['date']).exists()
+                        # ipdb.set_trace()
+                        if date_appointments_for_pat:
+                            return Response({"error": "This patient already has an appointment for this period!"}, status=status.HTTP_409_CONFLICT)
+                        
                     updated_fields = {}
                     for key, value in data.items():
 
@@ -120,10 +140,6 @@ class SpecificAppointmentView(APIView):
 
                         professional = updated_appointment.professional
                         patient = updated_appointment.patient
-
-                        # If 'finished' in data return error:
-                        if 'finished' in data:
-                            return Response({"error": "field 'finished' cannot be updated here. Consider other endpoint."}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
                         send_appointment_edition_email(appointment, professional, patient, updated_fields)
                         # send_appointment_edition_whatsapp(appointment, professional, patient)
@@ -242,9 +258,8 @@ class CreateAppointment(APIView):
             # No appointments in the past...:
             if not is_this_data_schedulable(str(date)):
                 return Response({"error": "A appointment cannot be scheduled in the past. Check date typed!"}, status=status.HTTP_400_BAD_REQUEST)
-            # ipdb.set_trace()
 
-            # Do we already have an appointment for this doctor at this hour?:
+            # Do we already have an appointment for this doctor at this period?:
             date_appointments_for_prof = AppointmentsModel.objects.filter(professional=professional, date=appointment_date).exists()
 
             if date_appointments_for_prof:
@@ -252,7 +267,7 @@ class CreateAppointment(APIView):
 
             # Is the patient already scheduled for another professional at this period?:
             date_appointments_for_pat = AppointmentsModel.objects.filter(patient=patient, date=appointment_date).exists()
-
+            # ipdb.set_trace()
             if date_appointments_for_pat:
                 return Response({"error": "This patient already has an appointment for this period!"}, status=status.HTTP_409_CONFLICT)
 
