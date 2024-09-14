@@ -122,7 +122,7 @@ class Professional(models.Model):
         if not self.council_number:
             raise ValidationError("Council number not provided!")
         
-        if self.user.address and self.user.address.state:
+        if self.user.address and self.user.address.state and not len(self.council_number) == 7: # only when council_number is not already fully created
             self.council_number = f"{self.council_number}-{self.user.address.state.upper()}"
 
         super(Professional, self).save(*args, **kwargs)
