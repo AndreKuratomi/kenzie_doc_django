@@ -178,7 +178,6 @@ class PatientByIdView(RetrieveUpdateDestroyAPIView):
                     setattr(user, key, value)
                 user.save()
 
-# a62bfe0c46717812a7a12c706cf878145adcb5c8
             # Address data update if provided:
             if address_data:
                 address = user.address
