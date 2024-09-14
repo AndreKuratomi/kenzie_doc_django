@@ -213,7 +213,7 @@ py manage.py runserver
 
 ## Documentation
 
-For full description of endpoints and its responses check the insomnia documentation on the link bellow (necessary free login account) click [here](https://kenziedoc-django-api-documentation.vercel.app/).
+For full description of endpoints and its responses check the insomnia documentation on the link bellow (necessary free login account) click [here](https://kenziedoc-mk7xydg29-abkuras-projects.vercel.app/).
 
 <br>
 
