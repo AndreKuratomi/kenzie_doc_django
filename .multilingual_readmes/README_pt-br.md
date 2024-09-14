@@ -186,7 +186,7 @@ py manage.py runserver
 
 ## Documentação
 
-Para ter acesso ao descrições detalhes das rotas e seus retornos, conferir documentação completa neste [link](https://kenziedoc-django-api-documentation.vercel.app/).
+Para ter acesso ao descrições detalhes das rotas e seus retornos, conferir documentação completa neste [link](https://kenziedoc-mk7xydg29-abkuras-projects.vercel.app/).
 
 <br>
 
