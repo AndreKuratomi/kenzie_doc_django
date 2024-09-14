@@ -28,7 +28,7 @@ def generate_register_number() -> str:
 
 
 def appointment_date_convertion(date: datetime) -> datetime:
-    """Converts appointment date to brazilian format '%d/%m/%Y - %H:%M'"""
+    """Converts appointment date to brazilian format '%d/%m/%Y - %H:%M' and timezone."""
 
     date_converted = date.astimezone(brazilian_timezone)
     appointment_date = date_converted.strftime(date_format)
