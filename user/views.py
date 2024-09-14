@@ -10,6 +10,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authentication import authenticate
 
+from utils.cep_func import get_address_by_cep
+
 from .models import Address, Patient, Professional, User, Admin
 from .serializers import AdminSerializer, AddressSerializer, LoginUserSerializer, PatientIdSerializer, PatientSerializer, ProfessionalSerializer, UserSerializer
 from .permissions import IsAdmin, IsJustLogged, PatientSelfOrAdminPermissions, ProfessionalSelfOrAdminPermissions
@@ -185,6 +187,14 @@ class PatientByIdView(RetrieveUpdateDestroyAPIView):
                     setattr(address, key, value)
                 address.save()
 
+                if 'post_code' in address_data:
+                    new_postcode = get_address_by_cep(address_data['post_code'])
+                    address.city = new_postcode['city']
+                    address.state = new_postcode['uf']
+                    address.street = new_postcode['street']
+                    address.save()
+
+            # ipdb.set_trace()
             serialized = UserSerializer(user)
 
             return Response(serialized.data, status=status.HTTP_200_OK)        
@@ -292,6 +302,7 @@ class ProfessionalsByIdView(APIView):
         
         return super().get_permissions()
 
+
     def get(self, request, council_number=''):
         try:
             professional = Professional.objects.get(council_number=council_number)
@@ -302,8 +313,8 @@ class ProfessionalsByIdView(APIView):
         except Professional.DoesNotExist:
             return Response(
                 {'message': 'Professional does not exist'}, status=status.HTTP_404_NOT_FOUND,
-            )        
-        
+            )
+
 
     def patch(self, request, council_number=''):
         try:
@@ -317,11 +328,11 @@ class ProfessionalsByIdView(APIView):
             
             # Council_number update not allowed:
             if 'council_number' in data:
-                response = {"message": "Council_number can't be updated!"}
+                response = {"message": "Council_number can't be updated by here!"}
                 return Response(response, status=status.HTTP_422_UNPROCESSABLE_ENTITY)                   
 
             # User and address data:
-            user_data = request.data.get("user", {})
+            user_data = request.data.pop("user", {})
             address_data = user_data.pop("address", {})
 
             # User data update if provided:
@@ -330,20 +341,49 @@ class ProfessionalsByIdView(APIView):
                     setattr(user, key, value)
                 user.save()
 
+            # Professional update if provided (in case, if 'specialty'):
+            if len(request.data) > 0:
+                for key, value in request.data.items():
+                    setattr(professional, key, value)
+
+                professional.save()
+
             # Address data update if provided:
             if address_data:
                 address = user.address
+
                 for key, value in address_data.items():
                     setattr(address, key, value)
                 address.save()
 
-            # Professional update if provided:
-            professional_data = {key: value for key, value in serialized.validated_data.items() if key != 'user'}
-            for key, value in professional_data.items():
-                setattr(professional, key, value)
-            professional.save()
+                if 'post_code' in address_data:
+                    new_postcode = get_address_by_cep(address_data['post_code'])
+                    address.city = new_postcode['city']
+                    address.state = new_postcode['uf']
+                    address.street = new_postcode['street']
 
-            professional = Professional.objects.get(council_number=council_number)
+                    address.save()
+
+                # If the professional changes its postcode or its state, so his council-number needs to change as well:
+                council_state = professional.council_number[-2:]
+                user_state = user.address.state.upper()
+
+                if council_state != user_state:
+                    new_council_number = f"{professional.council_number[:5]}" + f"{user_state.upper()}"
+
+                    professional.council_number = new_council_number
+
+                    # Do we have already a professional with this new council_number?
+                    if Professional.objects.filter(council_number=new_council_number).exists():
+                        return Response({'message': f"There's already a professional with this council number: {new_council_number}!"}, status=status.HTTP_409_CONFLICT)
+
+                    professional.save()
+
+                    return Response({
+                        'message': f"Council number was updated to {new_council_number}. Please use the new council number for future requests."
+                    }, status=status.HTTP_200_OK)
+
+
             serialized = ProfessionalSerializer(professional)
 
             return Response(serialized.data, status=status.HTTP_200_OK)        
