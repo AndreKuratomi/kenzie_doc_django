@@ -1,8 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import BaseUserManager
+from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 
+from utils.cep_func import get_address_by_cep
 from utils.functions import generate_register_number
 
 import uuid
@@ -67,9 +69,26 @@ class Address(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     street = models.CharField(max_length=255, blank=True)
     house_number = models.CharField(max_length=255)
-    post_code = models.CharField(max_length=255) # use a separate API for filling the blank ones
+    post_code = models.CharField(max_length=255,
+                                validators=[
+                                        RegexValidator(
+                                            regex=r'^[0-9]{5}-[0-9]{3}$',
+                                            message="Post code must be in the format 'ddddd-ddd' where 'd' is an alphanumeric character."
+                                        )
+                                    ])
     city = models.CharField(max_length=255, blank=True)
     state = models.CharField(max_length=2, blank=True)
+
+    def save(self, *args, **kwargs):
+        if self.post_code and (not self.street or not self.city or not self.state):
+            address_data = get_address_by_cep(self.post_code)
+
+            if address_data:
+                self.street = address_data.get('street', self.street)
+                self.city = address_data.get('city', self.city)
+                self.state = address_data.get('uf', self.state)
+
+        super(Address, self).save(*args, **kwargs)
 
 
 class Patient(models.Model):
@@ -81,7 +100,7 @@ class Patient(models.Model):
         validators=[
             RegexValidator(
                 regex=r'^[a-zA-Z0-9]{6}-[a-zA-Z0-9]{1}$',
-                message='Register number must be in the format dddddd-d where d is an alphanumeric character.'
+                message="Register number must be in the format 'dddddd-d' where 'd' is an alphanumeric character."
             )
         ]
     )
@@ -89,8 +108,24 @@ class Patient(models.Model):
 
 class Professional(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    council_number = models.CharField(max_length=8, unique=True)
+    council_number = models.CharField(max_length=4, 
+                                    unique=True,
+                                    validators=[
+                                        RegexValidator(
+                                            regex=r'^[0-9]{4}$',
+                                            message="Council number must be in the format 'dddd' where 'd' is an alphanumeric character. The other 3 characters are provided by the professional's state."
+                                        )
+                                    ])
     specialty = models.CharField(max_length=255)
+
+    def save(self, *args, **kwargs):
+        if not self.council_number:
+            raise ValidationError("Council number not provided!")
+        
+        if self.user.address and self.user.address.state and not len(self.council_number) == 7: # only when council_number is not already fully created
+            self.council_number = f"{self.council_number}-{self.user.address.state.upper()}"
+
+        super(Professional, self).save(*args, **kwargs)
 
 
 class Admin(models.Model):
