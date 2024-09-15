@@ -1,5 +1,6 @@
 # kenzie_doc_django
 
+- [Traduções](#traduções)
 - [Sobre](#sobre)
 - [Diagrama](#diagrama)
 - [Instalação](#instalação)
