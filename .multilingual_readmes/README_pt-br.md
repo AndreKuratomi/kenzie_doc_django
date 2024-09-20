@@ -1,5 +1,6 @@
 # kenzie_doc_django
 
+- [Traduções](#traduções)
 - [Sobre](#sobre)
 - [Diagrama](#diagrama)
 - [Instalação](#instalação)
@@ -13,7 +14,7 @@
 ## Traduções
 
 - [English / Inglês](https://github.com/AndreKuratomi/kenzie_doc_django)
-- [Português brasileiro / Brazilian portuguese](/.multilingual_readmes/README.pt-br.md)
+- [Português brasileiro / Brazilian portuguese](./README_pt-br.md)
 
 <br>
 
@@ -22,6 +23,8 @@
 <p>A API <b>kenzie_doc_django</b> se propõe a cadastrar médicos e pacientes na plataforma possibilitando o agendamento de consultas de maneira simples e intuitiva, além de fazer a gestão de consultas agendadas e da lista de espera.
 
 A aplicação também possibilita ao paciente fazer uma busca pelo profissional mais adequado para sua necessidade e agendar a consulta de forma confortável, prática e rápida.
+
+<b>kenzie_doc</b> também faz o <b>envio de emails</b> tanto para o paciente quanto para o profissional quando a consulta é agendada, alterada, finalizada ou mesmo cancelada. O mesmo para <b>mensagens de whatsapp</b>.
 
 Esta aplicação utiliza a linguagem <strong>[Python](https://www.python.org/downloads/)</strong>, seu framework <strong>[Django](https://www.djangoproject.com/)</strong> e o banco de dados <strong>[SQLite3](https://docs.python.org/3/library/sqlite3.html)</strong>.</p>
 
@@ -184,7 +187,7 @@ py manage.py runserver
 
 ## Documentação
 
-Para ter acesso ao descrições detalhes das rotas e seus retornos, conferir documentação completa neste [link](https://kenziedoc-django-api-documentation.vercel.app/).
+Para ter acesso ao descrições detalhes das rotas e seus retornos, conferir documentação completa neste [link](https://kenziedoc-mk7xydg29-abkuras-projects.vercel.app/).
 
 <br>
 
