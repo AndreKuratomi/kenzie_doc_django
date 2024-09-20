@@ -77,7 +77,7 @@ The patient model has <b>OneToOne</b> relationship the model User and is defined
 <h4>Endpoints</h4>
 <b>patient/</b>
 <br>
-<b>patient/<str:register_number>/</b>
+<b>patient/&ltstr:register_number&gt/</b>
 <br>
 <b>Obs:</b> for this version the register_number is case-sensitive.
 
@@ -110,8 +110,8 @@ The professional model has <b>OneToOne</b> relationship the model User and is de
 <h4>Endpoints</h4>
 
 <b>professional/:</b><br>
-<b>professional/<str:council_number>/:</b> -> The API will turn the council_number typed automatically to uppercase.<br>
-<b>professional/specialty/<str:specialty>/:</b> -> The API will capitalize the specialty typed automatically.
+<b>professional/&ltstr:council_number&gt/:</b> -> The API will turn the council_number typed automatically to uppercase.<br>
+<b>professional/specialty/&ltstr:specialty&gt/:</b> -> The API will capitalize the specialty typed automatically.
 
 <br>
 
@@ -178,10 +178,10 @@ The appointment model has relationship <b>ManyToOne</b> with both Patients and P
 
 <h4>Endpoints</h4>
 <b>appointments/:</b><br>
-<b>appointments/professional/<str:council_number>/:</b><br>
-<b>appointments/<str:appointment_id>/:</b><br>
-<b>appointment_finish/<str:appointment_id>/:</b><br>
-<b>appointments/patient/<str:register_number>/:</b><br>
+<b>appointments/professional/&ltstr:council_number&gt/:</b><br>
+<b>appointments/&ltstr:appointment_id&gt/:</b><br>
+<b>appointment_finish/&ltstr:appointment_id&gt/:</b><br>
+<b>appointments/patient/&ltstr:register_number&gt/:</b><br>
 <b>appointments_open/:</b><br>
 
 <br>
