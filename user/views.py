@@ -177,7 +177,10 @@ class PatientByIdView(RetrieveUpdateDestroyAPIView):
             # User data update if provided:
             if user_data:
                 for key, value in user_data.items():
-                    setattr(user, key, value)
+                    if key == "password":
+                        user.set_password(value)
+                    else:
+                        setattr(user, key, value)
                 user.save()
 
             # Address data update if provided:
@@ -338,7 +341,10 @@ class ProfessionalsByIdView(APIView):
             # User data update if provided:
             if user_data:
                 for key, value in user_data.items():
-                    setattr(user, key, value)
+                    if key == "password":
+                        user.set_password(value)
+                    else:
+                        setattr(user, key, value)
                 user.save()
 
             # Professional update if provided (in case, if 'specialty'):
