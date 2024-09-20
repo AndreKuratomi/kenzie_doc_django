@@ -68,7 +68,6 @@ The patient model has <b>OneToOne</b> relationship the model User and is defined
 <b>PatientsView:</b> class view for patient register (POST) and list of all patients (GET).
 <br>
 <b>Permissions:</b> every logged and not logged user may be registered as patient, but only admins can list all patients.
-
 <br><br>
 
 <b>PatientByIdView:</b> class view for own patient list (GET), update (PATCH) and deletion (DELETE).
@@ -95,7 +94,6 @@ The professional model has <b>OneToOne</b> relationship the model User and is de
 <b>ProfessionalsView:</b> class view for professional register (POST) and list of all professionals (GET).
 <br>
 <b>Permissions:</b> only logged admins may register and list professional.
-
 <br><br>
 
 <b>ProfessionalByIdView:</b> class view for own professional list (GET), update (PATCH) and deletion (DELETE).
