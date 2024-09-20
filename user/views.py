@@ -127,11 +127,11 @@ class PatientByIdView(RetrieveUpdateDestroyAPIView):
         
         return super().get_permissions()
 
-    lookup_url_kwarg = "patient_id"
+    lookup_url_kwarg = "register_number"
 
-    def get(self, request, patient_id=''):
+    def get(self, request, register_number=''):
         try:            
-            patient = Patient.objects.get(register_number=patient_id)
+            patient = Patient.objects.get(register_number=register_number)
             
             if patient:
                 # grant has_object_permission is going to be read because patient was manually called:            
@@ -151,9 +151,9 @@ class PatientByIdView(RetrieveUpdateDestroyAPIView):
                 {'message': 'Patient does not exist!'}, status=status.HTTP_404_NOT_FOUND,
             )        
 
-    def patch(self, request, patient_id=''):
+    def patch(self, request, register_number=''):
         try:
-            patient = Patient.objects.get(register_number=patient_id)
+            patient = Patient.objects.get(register_number=register_number)
             user = User.objects.get(patient=patient)
 
             # grant has_object_permission is going to be read because patient was manually called:
@@ -202,9 +202,9 @@ class PatientByIdView(RetrieveUpdateDestroyAPIView):
         except User.DoesNotExist:
             return Response({'message': 'User does not exist'}, status=status.HTTP_404_NOT_FOUND)
     
-    def delete(self, request, patient_id=''):
+    def delete(self, request, register_number=''):
         try:
-            patient = Patient.objects.get(register_number=patient_id)
+            patient = Patient.objects.get(register_number=register_number)
             user = User.objects.get(patient=patient)
 
             patient.delete()
@@ -318,7 +318,7 @@ class ProfessionalsByIdView(APIView):
 
     def patch(self, request, council_number=''):
         try:
-            professional = Professional.objects.get(council_number=council_number)
+            professional = Professional.objects.get(council_number=council_number.upper())
             user = User.objects.get(professional=professional)
 
             serialized = ProfessionalSerializer(data=request.data, partial=True)
