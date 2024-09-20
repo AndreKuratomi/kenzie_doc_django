@@ -69,7 +69,7 @@ The patient model has <b>OneToOne</b> relationship the model User and is defined
 <br>
 <b>Permissions:</b> every logged and not logged user may be registered as patient, but only admins can list all patients.
 
-<br>
+<br><br>
 
 <b>PatientByIdView:</b> class view for own patient list (GET), update (PATCH) and deletion (DELETE).
 <br>
@@ -96,12 +96,13 @@ The professional model has <b>OneToOne</b> relationship the model User and is de
 <br>
 <b>Permissions:</b> only logged admins may register and list professional.
 
-<br>
+<br><br>
 
 <b>ProfessionalByIdView:</b> class view for own professional list (GET), update (PATCH) and deletion (DELETE).
 <br>
 <b>Permissions:</b> every logged admin and the own professional may list and update some fields of its own data, but only admins can delete it.<br>
 <b>Obs:</b> if the permited user updates the address to a different state the professionals' council_number's final two digits are automatically updated.
+
 <br><br>
 
 <b>ProfessionalBySpecialtyView:</b> class view for listing all professionals registered by their specialty.<br>
@@ -153,11 +154,11 @@ The appointment model has relationship <b>ManyToOne</b> with both Patients and P
 
 <b>CreateAppointment:</b> class view for appointment schedule (POST).<br>
 <b>Permissions:</b> Only admins may schedule an appointment.
-<br>
+<br><br>
 
 <b>SpecificAppointmentView:</b> class view for appointment list, update and deletion.<br>
 <b>Permissions:</b> Only admins may may perform in this view.
-<br>
+<br><br>
 
 <b>SpecificPatientView:</b> class view for the patient's appointments list (GET).<br>
 <b>Permissions:</b> Only the own patient or admins may list his appointments.
