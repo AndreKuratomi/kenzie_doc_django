@@ -164,8 +164,15 @@ The appointment model has relationship <b>ManyToOne</b> with both Patients and P
 <b>Permissions:</b> Only the own professionl or admins may list his appointments.
 <br>
 
-<b>NotFinishedAppointmentsView:</b> class view for the waiting queue of the day.<br>
-<b>Permissions:</b> Only admins may list not finished appointments.
+<b>ProfessionalAppointmentsTodayView:</b> class view for the professional's open appointments of the current day.<br>
+<b>Permissions:</b> Only admins may list the professional's open appointments of the day.
+<br>
+
+<b>NotFinishedAppointmentsView:</b> class view for the waiting queue of the day by professional. It is returned a message like this: .<br>
+```
+    "msg": "There are 2 patients waiting for their appointments with Dr. Jefferson today. The average waiting time is ca 2 hours and 0 minutes"
+```
+<b>Permissions:</b> Only admins may list the professional's not finished appointments.
 <br>
 
 <b>FinishAppointmentView:</b> class view for finishing a specific appointment by its ID (PATCH).<br>
@@ -180,7 +187,8 @@ The appointment model has relationship <b>ManyToOne</b> with both Patients and P
 <b>appointments/&ltstr:appointment_id&gt/:</b><br>
 <b>appointment_finish/&ltstr:appointment_id&gt/:</b><br>
 <b>appointments/patient/&ltstr:register_number&gt/:</b><br>
-<b>appointments_open/:</b><br>
+<b>appointments/open_24/&ltstr:council_number&gt/:</b><br>
+<b>appointments/open/&ltstr:council_number&gt/:</b><br>
 
 <br>
 
