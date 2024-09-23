@@ -6,6 +6,7 @@ from django.utils import timezone
 
 from .variables import brazilian_timezone, brazilian_time_parsed, date_format
 
+import pytz
 import ipdb
 
 
@@ -30,7 +31,8 @@ def generate_register_number() -> str:
 def appointment_date_convertion(date: datetime) -> datetime:
     """Converts appointment date to brazilian format '%d/%m/%Y - %H:%M' and timezone."""
 
-    date_converted = date.astimezone(brazilian_timezone)
-    appointment_date = date_converted.strftime(date_format)
+    date = date.replace(tzinfo=pytz.utc)
 
+    appointment_date = date.strftime(date_format)
+    
     return appointment_date
