@@ -168,6 +168,17 @@ A model appointment (consulta) possui relacionamento <b>ManyToOne</b> tanto para
 <b>Permissions:</b> Apenas administradores podem listar a fila de espera.
 <br>
 
+<b>ProfessionalAppointmentsTodayView:</b> class view para as consultas do profissional não finalizadas do dia.<br>
+<b>Permissions:</b> Apenas administradores podem listar as consultas em aberto do dia.
+<br>
+
+<b>NotFinishedAppointmentsView:</b> class view para a fila de espera do dia por profissional. É retornada uma mensagem como esta: .<br>
+```
+    "msg": "There are 2 patients waiting for their appointments with Dr. Jefferson today. The average waiting time is ca 2 hours and 0 minutes"
+```
+<b>Permissions:</b> Apenas administradores podem retornar a duração da fila de espera.
+<br>
+
 <b>FinishAppointmentView:</b> class view para finalizar uma consulta pelo seu ID (PATCH).<br>
 <b>Permissions:</b> Apenas administradores podem finalizar uma consulta.
 <br>
