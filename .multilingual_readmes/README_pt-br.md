@@ -191,7 +191,8 @@ A model appointment (consulta) possui relacionamento <b>ManyToOne</b> tanto para
 <b>appointments/&ltstr:appointment_id&gt/</b><br>
 <b>appointment_finish/&ltstr:appointment_id&gt/</b><br>
 <b>appointments/patient/&ltstr:register_number&gt/</b><br>
-<b>appointments_open/</b><br>
+<b>appointments/open_24/&ltstr:council_number&gt/</b><br>
+<b>appointments/open/&ltstr:council_number&gt/</b><br>
 
 <br>
 
