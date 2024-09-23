@@ -332,7 +332,7 @@ py manage.py runserver
 
 ## Documentação
 
-Para ter acesso ao descrições detalhes das rotas e seus retornos, conferir documentação completa neste [link](https://kenziedoc-mk7xydg29-abkuras-projects.vercel.app/).
+Para ter acesso ao descrições detalhes das rotas e seus retornos, conferir documentação completa neste [link](https://insomnia-nhes2xv3h-abkuras-projects.vercel.app/#req_3aa20fbf10544effb17218fe1a267ff0).
 
 <br>
 
