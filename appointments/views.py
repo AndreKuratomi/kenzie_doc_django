@@ -74,7 +74,7 @@ class CreateAppointment(APIView):
 
             # Is the patient already scheduled for another professional at this period?:
             date_appointments_for_pat = AppointmentsModel.objects.filter(patient=patient, date=appointment_date).exists()
-            # ipdb.set_trace()
+
             if date_appointments_for_pat:
                 return Response({"error": "This patient already has an appointment for this period!"}, status=status.HTTP_409_CONFLICT)
 
@@ -191,7 +191,7 @@ class SpecificAppointmentView(APIView):
 
                         # Is the patient already scheduled for another professional at this period?:
                         date_appointments_for_pat = AppointmentsModel.objects.filter(patient=patient, date=data['date']).exists()
-                        # ipdb.set_trace()
+            
                         if date_appointments_for_pat:
                             return Response({"error": "This patient already has an appointment for this period!"}, status=status.HTTP_409_CONFLICT)
                         
@@ -255,26 +255,10 @@ class ProfessionalAppointmentsTodayView(APIView):
 
             if professional:
                 appointments = AppointmentsModel.objects.filter(professional=professional, date__date=now.date())
-                # ipdb.set_trace()
-                self.check_object_permissions(request, professional)
 
-                # not_finished = []
-
-                # for appointment in appointments:
-                #     if appointment.date < now and not appointment.finished and (appointment.date.date() == now.date()):
-                #         not_finished.append(appointment)
-
-                # # ipdb.set_trace()
-                # average_time = len(not_finished) * 60 # assuming an appointment of ca 1h.
-
-                # hours = math.floor(average_time / 60)
-                # minutes = average_time % 6                
+                self.check_object_permissions(request, professional)             
 
                 serializer = AppointmentsSerializer(appointments, many=True)
-
-                # not_finished_appointments = AppointmentsModel.objects.filter(finished=False)
-
-                # serializer = AppointmentsSerializer(not_finished_appointments, many=True)
 
                 return Response(
                     serializer.data, 
@@ -307,7 +291,7 @@ class NotFinishedAppointmentsView(APIView):
                     if appointment.date < now and not appointment.finished and (appointment.date.date() == now.date()):
                         not_finished.append(appointment)
 
-                # ipdb.set_trace()
+    
                 average_time = len(not_finished) * 60 # assuming an appointment of ca 1h.
 
                 hours = math.floor(average_time / 60)

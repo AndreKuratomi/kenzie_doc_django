@@ -59,7 +59,6 @@ class PatientsView(APIView):
 
             data = serializer.validated_data
 
-            # ipdb.set_trace()
             if User.objects.filter(cpf=data['cpf']).exists():
                 return Response({"message": "This user already exists!"}, status=status.HTTP_409_CONFLICT)
 
@@ -197,7 +196,6 @@ class PatientByIdView(RetrieveUpdateDestroyAPIView):
                     address.street = new_postcode['street']
                     address.save()
 
-            # ipdb.set_trace()
             serialized = UserSerializer(user)
 
             return Response(serialized.data, status=status.HTTP_200_OK)        

@@ -37,7 +37,6 @@ def send_appointment_edition_whatsapp(appointment: AppointmentsModel, profession
     updates = ""
     for field, values in data.items():
         if field == "date":
-            # ipdb.set_trace()
             before = appointment_date_convertion(values['before'])
             after = appointment_date_convertion(values['after'])
         else:
