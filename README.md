@@ -15,7 +15,7 @@
 ## Traduções
 
 - [English / Inglês](./.multilingual_readmes/README_en-uk.md)
-- [Português brasileiro / Brazilian portuguese](https://github.com/AndreKuratomi/kenzie_doc_django)
+- [Português brasileiro / Brazilian portuguese](https://github.com/AndreKuratomi/kenzie_doc_django/tree/pt_br)
 
 <br>
 
