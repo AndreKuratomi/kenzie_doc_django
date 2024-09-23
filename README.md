@@ -1,126 +1,126 @@
 # kenzie_doc_django
 
-- [Translations](#translations)
-- [About](#about)
-- [Diagram](#diagram)
-- [Description](#description)
-- [Instalation](#instalation)
-- [Documentation](#documentation)
-- [API developers](#api-developers)
-- [References](#references)
-- [Terms of use](#terms-of-use)
+- [Traduções](#traduções)
+- [Sobre](#sobre)
+- [Diagrama](#diagrama)
+- [Descrição](#descrição)
+- [Instalação](#instalação)
+- [Documentação](#documentação)
+- [Desenvolvedores da API](#desenvolvedores-da-api)
+- [Referências](#referências)
+- [Termos de uso](#termos-de-uso)
 
 <br>
 
-## Translations
+## Traduções
 
-- [Português brasileiro / Brazilian portuguese](./.multilingual_readmes/README_pt-br.md)
-- [English](https://github.com/AndreKuratomi/kenzie_doc_django)
-
-<br>
-
-## About
-
-
-<p>The API <b>kenzie_doc_django</b> was made for a clinic logistic. It makes CRUD operations for patients, physicians and secretaries (admins), creates and manages appointments in a simple and intuitive way, as well as manages the waiting queue of the day.
-
-This API also gives the user the possibility to look for professionals by its specialty and also to schedule appointments with the professional chosen in a very simple way.
-
-After the appointment is scheduled, <b>an email is automatically sent</b> for both patient and professional. They are also warned by email if the appointment is updated, finished or canceled. The very same for <b>whatsapp messages</b>.
-
-It uses the language <strong>[Python](https://www.python.org/downloads/)</strong>, its framework <strong>[Django](https://www.djangoproject.com/)</strong> and the database <strong>[SQLite3](https://docs.python.org/3/library/sqlite3.html)</strong>.</p>
+- [English / Inglês](./.multilingual_readmes/README_en-uk.md)
+- [Português brasileiro / Brazilian portuguese](https://github.com/AndreKuratomi/kenzie_doc_django)
 
 <br>
 
-## Diagram
+## Sobre
+
+<p>A API <b>kenzie_doc_django</b> se propõe a cadastrar médicos e pacientes na plataforma possibilitando o agendamento de consultas de maneira simples e intuitiva, além de fazer a gestão de consultas agendadas e da lista de espera.
+
+A aplicação também possibilita ao paciente fazer uma busca pelo profissional mais adequado para sua necessidade e agendar a consulta de forma confortável, prática e rápida.
+
+<b>kenzie_doc</b> também faz o <b>envio de emails</b> tanto para o paciente quanto para o profissional quando a consulta é agendada, alterada, finalizada ou mesmo cancelada. O mesmo para <b>mensagens de whatsapp</b>.
+
+Esta aplicação utiliza a linguagem <strong>[Python](https://www.python.org/downloads/)</strong>, seu framework <strong>[Django](https://www.djangoproject.com/)</strong> e o banco de dados <strong>[SQLite3](https://docs.python.org/3/library/sqlite3.html)</strong>.</p>
+
+<br>
+
+## Diagrama
 
 <figure>
-    <img src="./kenzie_doc_django.drawio.png" alt="diagram of table relationships">
-    <figcaption style="text-align: center">kenzie_doc_django API diagram</figcaption>
+    <img src="../kenzie_doc_django.drawio.png" alt="diagrama api kenzie_doc_django">
+    <figcaption style="text-align: center">Diagrama API kenzie_doc_django</figcaption>
 </figure>
 
 <br>
 
-## Description
+## Descrição
 
-Bellow a brief description of each table listed above, their permissions and their endpoints:
+A seguir uma breve descrição de cada tabela exibida acima, suas permissões (permissions) e seus endpoints:
 
-Due to the context that this API works with 3 different types of users that log the API and may perform some specific operations it was decided to work with customized User models. The user models are 'User', 'Patient', 'Professional' and 'Admin':
+Por causa do contexto desta API trabalhar com 3 diferentes tipos de usuário que logam nela e executam operações diferentes decidiu-se por utilizar User models personalizadas. As user models usadas são 'User', 'Patient', 'Professional' e 'Admin':
 
 <h3>User</h3>
 
 <h4>Model</h4>
 
-The User model could be descripted as the API's meta user. For this API it was developed to be the table that has the fields that all the other user models have in common. These other user models have <b>OneToOne</b> relationship with it.
+A User model poderia ser descrita como o metausuário da API. Para esta API ela foi desenvolvida para ser a model que possui os campos que todas as models relacionadas tem em comum. As user models possuem relacionamento <b>OneToOne</b> com ela.
 
-This model also has a relationship <b>OneToMany</b> with the <b>Address</b> model that is going to be treated afterwards.
+Esta model também tem relacionamento <b>OneToMany</b> com a model <b>Address</b> que será tratada mais para frente.
 
-The user table doesn't have its own views and endpoints.
+User não possui suas próprias views e endpoints.
 
 <br>
 
 <h3>Patient</h3>
 
 <h4>Model</h4>
-The patient model has <b>OneToOne</b> relationship the model User and is defined of having both 'is_admin' and 'is_prof' fields set to False in the related User model. Its specific field is the <b>'register_number'</b>, a random string with 6 letters, one hyphen and 1 number (e.g.: 'ZxcVaS-2') and generated after its registration.
+A model patient possui relacionamento <b>OneToOne</b> com a model User e se define como tendo os campos 'is_admin' e 'is_prof' em User como False. Seu campo específico é a <b>'register_number'</b>, uma string com 6 letras (case-sensitive), 1 hyphen e 1 número. Este campo é gerado após o cadastro do novo usuário.
 
-<h4>Views and permissions</h4>
-<b>PatientsView:</b> class view for patient register (POST) and list of all patients (GET).
+<h4>Views e permissions</h4>
+<b>PatientsView:</b> class view para cadastro do paciente (POST) e listagem de todos os pacientes cadastrados (GET).
 <br>
-<b>Permissions:</b> every logged and not logged user may be registered as patient, but only admins can list all patients.
+<b>Permissions:</b> qualquer usuário pode se cadastrar como paciente, mas apenas administradores podem listar todos os pacientes.
 <br><br>
 
-<b>PatientByIdView:</b> class view for own patient list (GET), update (PATCH) and deletion (DELETE).
+<b>PatientByIdView:</b> class view para listagem (GET), atualização de dados (PATCH) e deleção (DELETE) de um paciente pelo id (register_number).
 <br>
-<b>Permissions:</b> every logged admin and the own patient may list and update some fields of its own data, but only admins can delete it.
+<b>Permissions:</b> qualquer administrador e o próprio paciente podem listar dados do paciente e atualizar alguns deles, mas apenas os administradores podem deletar o usuário.
 
 <h4>Endpoints</h4>
 <b>patient/</b>
 <br>
 <b>patient/&ltstr:register_number&gt/</b>
 <br>
-<b>Obs:</b> for this version the register_number is case-sensitive.
+<b>Obs:</b> para esta versão 'register_number' é case-sensitive.
 
 <br>
 
 <h3>Professional</h3>
 
 <h4>Model</h4>
-The professional model has <b>OneToOne</b> relationship the model User and is defined of having only 'is_prof' field set to True in the related User model. Its specific fields are:<br><br>
-    1. the <b>'council_number'</b>, a string with 4 digits, one hyphen and 2 letters generated by the professional's address' postcode (see bellow) and<br> 
-    2. his <b>'specialty'</b>.
+A model professional tem relacionamento <b>OneToOne</b> com a model User e pode ser definida na model User como tendo apenas o campo 'is_prof' como True. Seus campos específicos são:<br><br>
+    1. <b>'council_number'</b>, uma string com 4 dígitos, 1 hyphen e 2 letras geradas pelo CEP do profissional (ver mais adiante) e<br> 
+    2. <b>'specialty'</b> (especialidade).
 
-<h4>Views and permissions</h4>
-<b>ProfessionalsView:</b> class view for professional register (POST) and list of all professionals (GET).
+<h4>Views e permissions</h4>
+<b>ProfessionalsView:</b> class view para cadastro do profissional (POST) e listagem de todos eles (GET).
 <br>
-<b>Permissions:</b> only logged admins may register and list professionals.
+<b>Permissions:</b> apenas admins podem cadastrar e listar profissionais.
 <br><br>
 
-<b>ProfessionalByIdView:</b> class view for list (GET), update (PATCH) and deletion (DELETE) of a professional by its council_number.
+<b>ProfessionalByIdView:</b> class view para listagem (GET), atualização (PATCH) e deleção (DELETE) de dados de um profissional por 'council_number'.
 <br>
-<b>Permissions:</b> every logged admin and the own professional may list and update some fields of its own data, but only admins can delete it.<br>
-<b>Obs:</b> if the permited user updates the address to a different state the professionals' council_number's final two digits are automatically updated.
+<b>Permissions:</b> qualquer administrador logado ou o próprio profissional podem listar e atualizar alguns campos dos próprios dados, mas apenas administradores podem deletá-los.<br>
+<b>Obs:</b> se o usuário permitido atualizar o CEP do profissional para um estado diferente o final da council_number será automaticamente atualizado para o estado correspondente.
+
 <br>
 
-<b>ProfessionalBySpecialtyView:</b> class view for listing all professionals registered by their specialty.<br>
-<b>Permissions:</b> every logged user may list it.<br><br>
+<b>ProfessionalBySpecialtyView:</b> class view para listar todos os profissionais registrados na especialidade procurada.<br>
+<b>Permissions:</b> qualquer usuário logado pode fazer esta busca.<br><br>
 
 <h4>Endpoints</h4>
 
 <b>professional/:</b><br>
-<b>professional/&ltstr:council_number&gt/:</b> -> The API will turn the council_number typed automatically to uppercase.<br>
-<b>professional/specialty/&ltstr:specialty&gt/:</b> -> The API will capitalize the specialty typed automatically.
+<b>professional/&ltstr:council_number&gt/:</b> -> A API transformará o council_number digitado automaticamente para uppercase.<br>
+<b>professional/specialty/&ltstr:specialty&gt/:</b> -> A API capitalizará a especialidade digitada automaticamente.
 
 <br>
 
 <h3>Admin</h3>
 
 <h4>Model</h4>
-The admin (secretary) model has <b>OneToOne</b> relationship the model User and is defined of having only 'is_admin' field set to True. It has no specific field.
+A model do administrador (secretária) tem relacionamento <b>OneToOne</b> com a model User e pode ser definida na model User como tendo apenas o campo 'is_admin' como True. Nesta versão ela não possui campo específico.
 
-<h4>Views and permissions</h4>
-<b>AdminView:</b> class view for professional register (POST) and list of all professionals (GET).<br>
-<b>Permissions:</b> only logged admins may list all admins.
+<h4>Views e permissions</h4>
+<b>AdminView:</b> class view para cadastro (POST) de administrador e listagem de todos os administradores (GET).<br>
+<b>Permissions:</b> apenas administradores podem cadastrar e listar outros administradores.
 
 <h4>Endpoints</h4>
 <b>admin/</b>
@@ -131,79 +131,80 @@ The admin (secretary) model has <b>OneToOne</b> relationship the model User and 
 
 <h4>Model</h4>
 
-The address model has <b>OneToMany</b> relationship the model User. It has just two compulsory fields to be filled: <b>house_number</b> and <b>post_code</b>.
+A model address possui relacionamento <b>OneToMany</b> com a model User. Ela tem apenas dois campos de preenchimento obrigatório: <b>house_number</b> e <b>post_code</b> (CEP).
 
-This model uses the brazilian lib <strong>brazilcep</strong> that provides the other optional fields 'street', 'city', 'state' if the postcode is given. This lib is used both for the user address registration and also for the professional's council_number:
+Esta model utiliza a biblioteca brasiliera <strong>brazilcep</strong> que fornece todos os campos opcionais 'street', 'city', 'state' se o CEP for fornecido. Esta lib é utilizada tanto para registro do endereço do usuário quanto para o council_number do profissional:
 
-E.G.: if the admin types '9876' for the professional's council_number and types '20031-170' for the postcode the response will be '9876-RJ'.
+Ex: se o administrador digitar '9876' para o council_number e digitar '20031-170' para o CEP a response será '9876-RJ'.
 
-As well as the user table, the address one also doesn't have its own views and endpoints.
+Assim como User, address não possui suas próprias views e endpoints.
 
 <br>
 
 <h3>Appointments</h3>
 
 <h4>Model</h4>
-The appointment model has relationship <b>ManyToOne</b> with both Patients and Professionals. Both users may have various appointments but each one has only one patient with one professional.
+A model appointment (consulta) possui relacionamento <b>ManyToOne</b> tanto para Patients quanto para Professionals. Ambos podem ter várias consultas, mas cada uma tem apenas um paciente com um profissional.
 
-<h4>Views and permissions</h4>
+<h4>Views e permissions</h4>
 
-<b>CreateAppointment:</b> class view for appointment schedule (POST).<br>
-<b>Permissions:</b> Only admins may schedule an appointment.
+<b>CreateAppointment:</b> class view para agendamento de consulta (POST).<br>
+<b>Permissions:</b> Apenas administradores podem agendar uma consulta.
 <br><br>
 
-<b>SpecificAppointmentView:</b> class view for listing, updating and deleting an appointment by its IB.<br>
-<b>Permissions:</b> Only admins may may perform in this view.
+<b>SpecificAppointmentView:</b> class view para listagem, atualização e deleção de uma consulta por ID.<br>
+<b>Permissions:</b> Apenas administradores podem operar nesta view.
 <br><br>
 
-<b>SpecificPatientView:</b> class view for the patient's appointments list (GET).<br>
-<b>Permissions:</b> Only the own patient or admins may list his appointments.
+<b>SpecificPatientView:</b> class view para listagem das consultas de um paciente pelo seu register_number (GET).<br>
+<b>Permissions:</b> Apenas o próprio paciente ou administradores podem listar essas consultas.
 <br>
 
-<b>SpecificProfessionalView:</b> class view for the professional's appointments list (GET).<br>
-<b>Permissions:</b> Only the own professionl or admins may list his appointments.
+<b>SpecificProfessionalView:</b> class view para listagem das consultas de um profissional pelo seu council_number (GET).<br>
+<b>Permissions:</b> Apenas o próprio profissional ou administradores podem listar essas consultas.
 <br>
 
-<b>NotFinishedAppointmentsView:</b> class view for the waiting queue of the day.<br>
-<b>Permissions:</b> Only admins may list not finished appointments.
+<b>NotFinishedAppointmentsView:</b> class view para a fila de espera do dia.<br>
+<b>Permissions:</b> Apenas administradores podem listar a fila de espera.
 <br>
 
-<b>FinishAppointmentView:</b> class view for finishing a specific appointment by its ID (PATCH).<br>
-<b>Permissions:</b> Only admins may finish an appointment.
+<b>FinishAppointmentView:</b> class view para finalizar uma consulta pelo seu ID (PATCH).<br>
+<b>Permissions:</b> Apenas administradores podem finalizar uma consulta.
 <br>
 
-<b>Obs:</b> All view operations for POST, PATCH and DELETE have notifications configured to be sent for the patient's and professional's email and whatsapp number.
+<b>Obs:</b> Todas as operações nestas views com POST, PATCH e DELETE possuem notificações configuradas para serem enviadas para os emails e números de whatsapp do paciente e do profissional automaticamente.
 
 <h4>Endpoints</h4>
-<b>appointments/:</b><br>
-<b>appointments/professional/&ltstr:council_number&gt/:</b><br>
-<b>appointments/&ltstr:appointment_id&gt/:</b><br>
-<b>appointment_finish/&ltstr:appointment_id&gt/:</b><br>
-<b>appointments/patient/&ltstr:register_number&gt/:</b><br>
-<b>appointments_open/:</b><br>
+<b>appointments/</b><br>
+<b>appointments/professional/&ltstr:council_number&gt/</b><br>
+<b>appointments/&ltstr:appointment_id&gt/</b><br>
+<b>appointment_finish/&ltstr:appointment_id&gt/</b><br>
+<b>appointments/patient/&ltstr:register_number&gt/</b><br>
+<b>appointments_open/</b><br>
 
 <br>
 
-## Instalation
+## Instalação
 
-<h3>0. It is first necessary to have instaled the following devices:</h3>
 
-- The code versioning <b>[Git](https://git-scm.com/downloads)</b>.
+<h3>0. Primeiramente, é necessário já ter instalado na própria máquina:</h3>
 
-- A <b>code editor</b>, also known as <b>IDE</b>. For instance, <strong>[Visual Studio Code (VSCode)](https://code.visualstudio.com/)</strong>.
+- O versionador de codigo <b>[Git](https://git-scm.com/downloads)</b>.
 
-- The programming language <strong>[Python](https://www.python.org/downloads/)</strong>.
+- A linguagem de programação <b>[Python](https://www.python.org/downloads/)</b>.
 
-- A <b> client API REST </b> program. <strong>[Insomnia](https://insomnia.rest/download)</strong> or <b>[Postman](https://www.postman.com/product/rest-client/)</b>, for instance.
+- Um <b>editor de código</b>, conhecido também como <b>IDE</b>. Por exemplo, o <b>[Visual Studio Code (VSCode)](https://code.visualstudio.com/)</b>.
 
-- <p> And versioning your directory to receive the aplication clone:</p>
+- Uma <b>ferramenta cliente de API REST</b>. Por exemplo, o <b>[Insomnia](https://insomnia.rest/download)</b> ou o <b>[Postman](https://www.postman.com/product/rest-client/)</b>.
+
+- <p> E versionar o diretório escolhido para receber o clone da aplicação:</p>
 
 ```
 git init
 ```
 <br>
 
-<h3>1. Clone the repository <b>kenzie_doc_django</b> by your machine terminal or by the IDE's:</h3>
+<h3>1. Fazer o clone do reposítório <b>kenzie_doc_django</b> na sua máquina pelo terminal do computador ou pelo do IDE:</h3>
 
 ```
 git clone https://github.com/AndreKuratomi/kenzie_doc_django.git
@@ -211,29 +212,29 @@ git clone https://github.com/AndreKuratomi/kenzie_doc_django.git
 
 WINDOWS:
 
-Obs: In case of any mistake similar to this one: 
+Obs: Caso apareca algum erro semelhante a este: 
 
 ```
-unable to access 'https://github.com/AndreKuratomi/kenzie_doc_django.git/': SSL certificate problem: self-signed certificate in certificate chain
+unable to access 'https://github.com/AndreKuratomi/kenzie_doc_django.git': SSL certificate problem: self-signed certificate in certificate chain
 ```
 
-Configure git to disable SSL certification:
+Configure o git para desabilitar a certificação SSL:
 
 ```
 git config --global http.sslVerify "false"
 ```
 
-<p>Enter the directory:</p>
+
+<p>Entrar na pasta criada:</p>
 
 ```
 cd kenzie_doc_django
 ```
 <br>
 
-<h3>2. After cloning the repository install:</h3>
+<h3>2. Após feito o clone do repositório, instalar:</h3>
 
-<h4>Virtual enviroment* and update its dependencies with the following command:</h4>
-
+<h4>O ambiente virtual* e atualizar suas dependências com o seguinte comando:</h4>
 
 LINUX:
 ```
@@ -245,7 +246,7 @@ WINDOWS:
 py -m venv venv --upgrade-deps
 ```
 
-In case an error like this one is returned just follow the command displayed:
+Caso seja retornado algum erro semelhante a este basta seguir as instruções:
 
 ```
 The virtual environment was not created successfully because ensurepip is not
@@ -258,91 +259,66 @@ You may need to use sudo with that command.  After installing the python3-venv
 package, recreate your virtual environment.
 ```
 
-*It is a good practice to work with virtual enviroments because different projects may need different dependencies. A virtual enviroment is only a separated enviroment from the user machine. If not used, the user's machine may have lots of dependencies intalled that may only be used in a single project.
-<br>
-<h4>Ativate your virtual enviroment with the command:</h4>
+*É interessante seguir esta prática porque diferentes projetos exigem diferentes dependências. Um ambiente virtual nada mais é do que um ambiente separado da sua máquina. Caso contrário, a máquina do usuário pode se encher de dependências que serão utilizadas apenas em um único projeto.
+
+<h4>Ative o seu ambiente virtual com o comando:</h4>
 
 LINUX:
 ```
-source venv/bin/activate
+source/venv/bin/activate
 ```
 
 WINDOWS:
 
-On Windows operational system it is necessary to configure the Execution Policy at PowerShell:
+No sistema operacional Windows é necessário antes configurar o Execution Policy do PowerShell:
 
 ```
-Get-ExecutionPolicy # to check the Execution policy type
-Set-ExecutionPolicy RemoteSigned # to change the type of policy if the command above shows 'Restricted'
+Get-ExecutionPolicy # para verificar o tipo de política de execução
+Set-ExecutionPolicy RemoteSigned # para alterar o tipo de política se o comando acima mostrar 'Restricted'
 ```
-Obs: It may often be necessary to open PowerShell as administrador for that.
+Obs: Eventualmente, pode ser necessário abrir o PowerShell como administrador.
 
 ```
-.\env\Scripts\activate
+.\venv\Scripts\activate
 ```
-<br>
-<h4>Install its dependencies:</h4>
+
+
+<h4>Instalar suas dependências:</h4>
 
 ```
 pip install -r requirements.txt
 ```
-<br>
-
 
 WINDOWS:
 
-In case any error similar to the one bellow be returned:
+Caso seja retornado algum erro semelhante a este:
 
 ```
 ERROR: Could not install packages due to an OSError: [Errno 2] No such file or directory: 'C:\\Users\\andre.kuratomi\\OneDrive - Company\\Área de Trabalho\\kenzie_doc_django\\kenzie_doc_django\\env\\Lib\\site-packages\\jedi\\third_party\\django-stubs\\django-stubs\\contrib\\contenttypes\\management\\commands\\remove_stale_contenttypes.pyi'
 HINT: This error might have occurred since this system does not have Windows Long Path support enabled. You can find information on how to enable this at https://pip.pypa.io/warnings/enable-long-paths
 ```
 
-Run cmd as adminstrador with the following command:
+Rode no cmd como adminstrador o seguinte comando:
 
 ```
 reg.exe add HKLM\SYSTEM\CurrentControlSet\Control\FileSystem /v LongPathsEnabled /t REG_DWORD /d 1 /f
 ```
 <br>
 
-<h3>3. Open the aplication with your IDE:</h3>
+<h3>3. Abrir a aplicação no IDE:</h3>
 
 ```
 code .
 ```
 <br>
 
-<h3>4. Create <b>.env</b> file:</h3>
-
-./
-```
-touch .env
-```
-
-Inside it we need to put our enviroment variables taking as reference the given file <b>.env.example</b>:
-
-```
-# DJANGO:
-SECRET_KEY=secret_key
-
-# EMAIL VARIABLES:
-EMAIL_HOST_USER=host_email
-EMAIL_HOST_PASSWORD=host_password
-
-```
-
-Obs: Do not share info from .env file. It is already mentioned in <b>.gitignore</b> for not being pushed to the repo.
-
-<br>
-<h3>5. And run django:</h3>
+<h3>4. E executá-la:</h3>
 
 LINUX:
 ```
 python manage.py runserver
 ```
-
-or  
-
+ou
 ```
 ./manage.py runserver
 ```
@@ -352,16 +328,15 @@ WINDOWS:
 py manage.py runserver
 ```
 
+<br>
+
+## Documentação
+
+Para ter acesso ao descrições detalhes das rotas e seus retornos, conferir documentação completa neste [link](https://kenziedoc-mk7xydg29-abkuras-projects.vercel.app/).
 
 <br>
 
-## Documentation
-
-For full description of endpoints and its responses check the insomnia documentation on the link bellow (necessary free login account) click [here](https://kenziedoc-mk7xydg29-abkuras-projects.vercel.app/).
-
-<br>
-
-## API developers
+## Desenvolvedores da API
 
 <div>
     <p>Pierre Kalil - Techlead</p><a href="https://www.linkedin.com/in/pierre-kalil/" target="_blank" ><img src="https://img.shields.io/badge/-LinkedIn-%230077B5?style=for-the-badge&logo=linkedin&logoColor=white" target="_blank"></a> 
@@ -398,7 +373,7 @@ For full description of endpoints and its responses check the insomnia documenta
 
 <br>
 
-## References
+## Referências
 
 - [Django](https://www.djangoproject.com/)
 - [Django Rest Framework](https://www.django-rest-framework.org/)
@@ -412,6 +387,6 @@ For full description of endpoints and its responses check the insomnia documenta
 
 <br>
 
-## Terms of use
+## Termos de uso
 
-This project is exclusively for didatic purposes and has no commercial intent.
+Esse projeto atende a fins exclusivamente didáticos e sem nenhum intuito comercial.
