@@ -12,7 +12,6 @@ class PatientSelfOrAdminPermissions(BasePermission):
         return request.user.is_authenticated
         
     def has_object_permission(self, request, view, obj):
-        # import ipdb; ipdb.set_trace()
         if request.user.is_admin:
             return True
         if not request.user.is_prof and obj.user == request.user:
@@ -25,7 +24,6 @@ class ProfessionalSelfOrAdminPermissions(BasePermission):
         return request.user.is_authenticated
         
     def has_object_permission(self, request, view, obj):
-        # import ipdb; ipdb.set_trace()
         if request.user.is_admin:
             return True
         if request.user.is_prof and obj.user == request.user:
