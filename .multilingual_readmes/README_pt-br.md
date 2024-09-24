@@ -27,7 +27,7 @@ A aplicação também possibilita ao paciente fazer uma busca pelo profissional 
 
 <b>kenzie_doc</b> também faz o <b>envio de emails</b> tanto para o paciente quanto para o profissional quando a consulta é agendada, alterada, finalizada ou mesmo cancelada. O mesmo para <b>mensagens de whatsapp</b>.
 
-Esta aplicação utiliza a linguagem <strong>[Python](https://www.python.org/downloads/)</strong>, seu framework <strong>[Django](https://www.djangoproject.com/)</strong> e o banco de dados <strong>[SQLite3](https://docs.python.org/3/library/sqlite3.html)</strong>.</p>
+Esta aplicação utiliza a linguagem <strong>[Python](https://www.python.org/downloads/)</strong>, seu framework <strong>[Django](https://www.djangoproject.com/)</strong> e o banco de dados <strong>[SQLite3](https://docs.python.org/3/library/sqlite3.html)</strong>. Para o envio de emails é usada a funçaõ nativa de Django <strong>[sendmail](https://docs.djangoproject.com/en/5.1/topics/email/)</strong> e para o envio de menssagens whatsapp a lib <strong>[PyWhatKit](https://pypi.org/project/pywhatkit/)</strong>.</p>
 
 <br>
 
