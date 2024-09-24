@@ -394,6 +394,8 @@ Para ter acesso ao descrições detalhes das rotas e seus retornos, conferir doc
 - [Insomnia-documenter](https://www.npmjs.com/package/insomnia-documenter)
 - [Insomnia-documenter (quick tutorial)](https://www.youtube.com/watch?v=pq2u3FqVVy8)
 - [Python](https://www.python.org/downloads/)
+- [PyWhatKit](https://pypi.org/project/pywhatkit/)
+- [sendmail](https://docs.djangoproject.com/en/5.1/topics/email/)
 - [SQLite3](https://docs.python.org/3/library/sqlite3.html)
 - [Visual Studio Code (VSCode)](https://code.visualstudio.com/)
 
