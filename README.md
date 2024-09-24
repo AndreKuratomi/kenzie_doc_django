@@ -28,7 +28,7 @@ This API also gives the user the possibility to look for professionals by its sp
 
 After the appointment is scheduled, <b>an email is automatically sent</b> for both patient and professional. They are also warned by email if the appointment is updated, finished or canceled. The very same for <b>whatsapp messages</b>.
 
-It uses the language <strong>[Python](https://www.python.org/downloads/)</strong>, its framework <strong>[Django](https://www.djangoproject.com/)</strong> and the database <strong>[SQLite3](https://docs.python.org/3/library/sqlite3.html)</strong>.</p>
+It uses the language <strong>[Python](https://www.python.org/downloads/)</strong>, its framework <strong>[Django](https://www.djangoproject.com/)</strong> and the database <strong>[SQLite3](https://docs.python.org/3/library/sqlite3.html)</strong>. For sending emails it uses Django's <strong>[sendmail](https://docs.djangoproject.com/en/5.1/topics/email/)</strong> and for whatsapp messages the <strong>[PyWhatKit](https://pypi.org/project/pywhatkit/)</strong> lib.</p>
 
 <br>
 
@@ -415,6 +415,8 @@ For full description of endpoints and its responses check the insomnia documenta
 - [Insomnia-documenter](https://www.npmjs.com/package/insomnia-documenter)
 - [Insomnia-documenter (quick tutorial)](https://www.youtube.com/watch?v=pq2u3FqVVy8)
 - [Python](https://www.python.org/downloads/)
+- [PyWhatKit](https://pypi.org/project/pywhatkit/)
+- [sendmail](https://docs.djangoproject.com/en/5.1/topics/email/)
 - [SQLite3](https://docs.python.org/3/library/sqlite3.html)
 - [Visual Studio Code (VSCode)](https://code.visualstudio.com/)
 
