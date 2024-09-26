@@ -34,7 +34,7 @@ Esta aplicação utiliza a linguagem <strong>[Python](https://www.python.org/dow
 ## Diagrama
 
 <figure>
-    <img src="../kenzie_doc_django.drawio.png" alt="diagrama api kenzie_doc_django">
+    <img src="./kenzie_doc_django.drawio.png" alt="diagrama api kenzie_doc_django">
     <figcaption style="text-align: center">Diagrama API kenzie_doc_django</figcaption>
 </figure>
 
