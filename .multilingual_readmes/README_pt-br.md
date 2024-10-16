@@ -14,8 +14,8 @@
 
 ## Traduções
 
-- [English / Inglês](https://github.com/AndreKuratomi/kenzie_doc_django)
-- [Português brasileiro / Brazilian portuguese](./README_pt-br.md)
+- [🇬🇧 / 🇺🇸 English / Inglês](https://github.com/AndreKuratomi/kenzie_doc_django)
+- [🇧🇷 Português brasileiro / Brazilian portuguese](./README_pt-br.md)
 
 <br>
 
